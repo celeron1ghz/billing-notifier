@@ -4,15 +4,24 @@ const aws = require('aws-sdk');
 const cb  = new aws.CodeBuild();
 
 module.exports.kicker = (event, context, callback) => {
-    cb.startBuild({ projectName: 'billing-notifier-etc' }, function(err, ret){
-        callback(err, ret.build);
+    cb.startBuild({ projectName: 'billing-notifier-viewcard' }, function(err, ret){
+        if (err)    {
+            callback(err);
+        } else {
+            callback(null, ret.build);
+        }
     })
 };
 
 module.exports.status_getter = (event, context, callback) => {
     cb.batchGetBuilds({ ids: [event.id] }, function(err, ret){
-        callback(err, ret.builds[0]);
+        if (err)    {
+            callback(err);
+        } else {
+            callback(null, ret.builds[0]);
+        }
     });
 };
 
-module.exports.etc = require('./etc.js');
+module.exports.etc      = require('./handler/etc.js');
+module.exports.viewcard = require('./handler/viewcard.js');
