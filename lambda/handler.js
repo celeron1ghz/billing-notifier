@@ -14,3 +14,5 @@ module.exports.status_getter = (event, context, callback) => {
         callback(err, ret.builds[0]);
     });
 };
+
+module.exports.etc = require('./etc.js');
