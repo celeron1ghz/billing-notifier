@@ -4,7 +4,7 @@ const aws = require('aws-sdk');
 const cb  = new aws.CodeBuild();
 
 module.exports.kicker = (event, context, callback) => {
-    cb.startBuild({ projectName: 'billing-notifier-viewcard' }, function(err, ret){
+    cb.startBuild({ projectName: 'billing-notifier' }, function(err, ret){
         if (err)    {
             callback(err);
         } else {
