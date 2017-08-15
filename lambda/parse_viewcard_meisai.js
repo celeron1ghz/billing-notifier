@@ -1,0 +1,74 @@
+'use strict';
+
+process.env.AWS_REGION = 'ap-northeast-1';
+
+const nightmare = new require('nightmare')({ show: true });
+const vo   = require('vo');
+const cred = require('credstash-promise');
+
+vo(function*(){
+    const url  = 'https://viewsnet.jp/';
+    const id   = yield cred.fetchCred('VIEWCARD_BILLING_NOTIFIER_ID');
+    const pass = yield cred.fetchCred('VIEWCARD_BILLING_NOTIFIER_PASSWORD');
+
+    let result = [];
+    nightmare.viewport(1000, 1000)
+        .useragent("Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36")
+        .goto(url)
+        // login
+        .type("input[name=id]", id)
+        .type("input[name=pass]", pass)
+        .click("input[type=image]")
+        .wait(1000)
+        // 
+        .click("a#vucGlobalNavi_LnkV0300_001Header")
+        .wait(1000)
+        //
+        .click("a#LnkYotei")
+        .wait(1000)
+
+    while (true)   {
+        const meisai = yield nightmare.evaluate(function () {
+            const css = (parent, selector) => [].slice.apply(parent.querySelectorAll(selector));
+
+            const trs = css(document, "div#DivDetailInfo table tbody tr");
+            trs.shift();
+
+            return trs.map(function(tr){
+                const td1 = css(tr, "td:nth-child(1)");
+                const td2 = css(tr, "td:nth-child(2)");
+                const td3 = css(tr, "td:nth-child(3)");
+                const td4 = css(tr, "td:nth-child(4)");
+
+                return {
+                    date:    (td1.length != 0 ? css(td1[0], "span").map(e => e.textContent).join("/") : ""),
+                    card_no: (td2.length != 0 ? css(td2[0], "span")[0].innerHTML : ""),
+                    shop:    (td3.length != 0 ? css(td3[0], "strong")[0].textContent : ""),
+                    price:   (td4.length != 0 ? css(td4[0], "strong")[0].textContent.replace(/,/g, "") : ""),
+                };
+            });
+        });
+
+        meisai.shift();
+        result = result.concat(meisai);
+
+        const next_button = yield nightmare.evaluate(
+            () => document.querySelector("#LnkNextBottom")
+        );
+
+        if (!next_button)  {
+            break;
+        }
+
+        nightmare.click("#LnkNextBottom")
+            .wait("div#DivDetailInfo")
+            .wait(1000);
+    }
+
+    yield nightmare.end();
+    return result;
+})
+.then(data => {
+    console.log(JSON.stringify(data));
+})
+.catch(err => { throw new Error(err) })

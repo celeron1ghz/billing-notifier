@@ -34,12 +34,10 @@ module.exports = (event, context, callback) => {
             });
 
         // running codebuild for getting new etc history
-        const cb_output_arn = event.artifacts.location;
-        const bucket = cb_output_arn.split('/')[0].split(':')[5];
-        const path   = cb_output_arn.replace(/^.*?\//, "") + "/viewcard.txt";
+        const path   = "codebuild_result/etc.txt";
+        console.log(`S3.getObject(${BUCKET}#${path})`);
 
-        console.log(`S3.getObject(${bucket}#${path})`);
-        const cb_result = yield s3.getObject({ Bucket: bucket, Key: path }).promise();
+        const cb_result = yield s3.getObject({ Bucket: BUCKET, Key: path }).promise();
 
         const new_history    = JSON.parse(cb_result.Body.toString());
         const notify_history = new_history.slice(old_history.length, new_history.length + 1);
