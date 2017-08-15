@@ -1,0 +1,105 @@
+service: billing-notifier
+
+provider:
+  name: aws
+  runtime: nodejs4.3
+  stage: dev
+  region: ap-northeast-1
+  deploymentBucket: serverless-upload-ap-northeast-1
+  versionFunctions: false
+  variableSyntax: "\\${{([\\s\\S]+?)}}"
+
+  iamRoleStatements:
+    - Effect: Allow
+      Resource:
+        Fn::Join: [":", [ "arn:aws:codebuild", { Ref: AWS::Region }, { Ref: AWS::AccountId }, "project/billing-notifier-viewcard" ]]
+        #Fn::Join: [":", [ "arn:aws:codebuild", { Ref: AWS::Region }, { Ref: AWS::AccountId }, "project/billing-notifier-etc" ]]
+      Action:
+        - codebuild:StartBuild
+        - codebuild:BatchGetBuilds
+    - Effect: Allow
+      Resource: "arn:aws:s3:::${{self:service}}"
+      Action:
+        - "s3:List*"
+    - Effect: Allow
+      Resource: "arn:aws:s3:::${{self:service}}/*"
+      Action:
+        - "s3:Get*"
+        - s3:PutObject
+
+functions:
+  kicker:
+    handler: handler.kicker
+  checker:
+    handler: handler.status_getter
+  etc:
+    handler: handler.etc
+    environment:
+      ETC_BILLING_NOTIFIER_SLACK_WEBHOOK_URL: ${file(kms.js):kms.ETC_BILLING_NOTIFIER_SLACK_WEBHOOK_URL}
+  viewcard:
+    handler: handler.viewcard
+    environment:
+      ETC_BILLING_NOTIFIER_SLACK_WEBHOOK_URL: ${file(kms.js):kms.ETC_BILLING_NOTIFIER_SLACK_WEBHOOK_URL}
+
+resources:
+  Resources:
+    ## override
+    IamRoleLambdaExecution:
+      Properties:
+        RoleName: "${{self:service}}-exec"
+
+    ResultStoreBucket:
+      Type: AWS::S3::Bucket
+      DependsOn:
+        - IamRoleLambdaExecution
+      Properties:
+       BucketName: "${{self:service}}"
+
+    IamRoleStateMachineExecution:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: "${{self:service}}-state"
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal: { Service: "states.ap-northeast-1.amazonaws.com" }
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: "${{self:service}}-exec-policy"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action: 
+                    - lambda:InvokeFunction
+                  Resource:
+                    - { Fn::GetAtt: [KickerLambdaFunction, Arn] }
+                    - { Fn::GetAtt: [CheckerLambdaFunction, Arn] }
+                    - { Fn::GetAtt: [ViewcardLambdaFunction, Arn] }
+                    - { Fn::GetAtt: [EtcLambdaFunction, Arn] }
+
+    CodeBuildPoller:
+      Type: AWS::StepFunctions::StateMachine
+      Properties:
+        RoleArn:
+          Fn::GetAtt: [ IamRoleStateMachineExecution, Arn ]   
+        DefinitionString: 
+          Fn::Sub: |-
+            {
+              "Comment": "Polling codebuild running",
+              "StartAt": "JobMain",
+              "States": {
+                "JobMain":    { "Type": "Task", "Resource": "${KickerLambdaFunction.Arn}",  "Next": "JobCheck" },
+                "JobCheck":   { "Type": "Task", "Resource": "${CheckerLambdaFunction.Arn}", "Next": "JobPoller" },
+                "JobPoller":  {
+                  "Type": "Choice",
+                  "Choices": [
+                    { "Variable": "$.buildStatus", "StringEquals": "SUCCEEDED",   "Next": "JobSuccess" },
+                    { "Variable": "$.buildStatus", "StringEquals": "IN_PROGRESS", "Next": "JobWait" }
+                  ]
+                },
+                "JobWait":    { "Type": "Wait", "Seconds": 5, "Next": "JobCheck" },
+                "JobSuccess": { "Type": "Task", "Resource": "${ViewcardLambdaFunction.Arn}", "End": true }
+              }
+            }
