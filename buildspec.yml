@@ -7,5 +7,5 @@ phases:
 
 artifacts:
   files:
-    - result.txt
+    - etc.txt
   discard-paths: yes
