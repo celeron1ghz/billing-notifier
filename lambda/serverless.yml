@@ -155,12 +155,28 @@ resources:
                 "JobPoller":  {
                   "Type": "Choice",
                   "Choices": [
-                    { "Variable": "$.buildStatus", "StringEquals": "SUCCEEDED",   "Next": "JobSuccess" },
+                    { "Variable": "$.buildStatus", "StringEquals": "SUCCEEDED",   "Next": "JobCalcDiff" },
                     { "Variable": "$.buildStatus", "StringEquals": "IN_PROGRESS", "Next": "JobWait" }
                   ]
                 },
                 "JobWait":    { "Type": "Wait", "Seconds": 5, "Next": "JobCheck" },
-                "JobSuccess": { "Type": "Task", "Resource": "${EtcLambdaFunction.Arn}", "End": true }
+                "JobCalcDiff": {
+                  "Type": "Parallel",
+                  "Branches": [
+                    {
+                      "StartAt": "ParseEtcSite",
+                      "States":{
+                        "ParseEtcSite": { "Type": "Task", "Resource": "${EtcLambdaFunction.Arn}", "End": true }
+                      }
+                    },{
+                      "StartAt": "ParseViewcardSite",
+                      "States":{
+                        "ParseViewcardSite": { "Type": "Task", "Resource": "${ViewcardLambdaFunction.Arn}", "End": true }
+                      }
+                    }
+                  ],
+                  "End": true
+                }
               }
             }
 

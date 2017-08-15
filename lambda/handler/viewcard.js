@@ -18,7 +18,7 @@ const post_message = (param) => new Promise((resolve,reject) => {
 module.exports = (event, context, callback) => {
     vo(function*(){
         const now = new Date();
-        const filename = `${now.getFullYear()}${ ("0"+now.getMonth()).slice(-2) }.json`;
+        const filename = `viewcard/${now.getFullYear()}${ ("0"+now.getMonth()).slice(-2) }.json`;
 
         // getting etc history from s3
         console.log(`S3.getObject(${BUCKET}#${filename})`);
