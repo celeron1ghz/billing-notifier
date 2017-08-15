@@ -4,7 +4,7 @@ const vo  = require('vo');
 const aws = require('aws-sdk');
 const s3  = new aws.S3({ signatureVersion: "v4" });
 
-const BUCKET = "billing-notifier-viewcard";
+const BUCKET = "billing-notifier";
 
 const post_message = (param) => new Promise((resolve,reject) => {
     const Slack   = require('slack-node');
@@ -36,7 +36,7 @@ module.exports = (event, context, callback) => {
         // running codebuild for getting new etc history
         const cb_output_arn = event.artifacts.location;
         const bucket = cb_output_arn.split('/')[0].split(':')[5];
-        const path   = cb_output_arn.replace(/^.*?\//, "") + "/result.txt";
+        const path   = cb_output_arn.replace(/^.*?\//, "") + "/viewcard.txt";
 
         console.log(`S3.getObject(${bucket}#${path})`);
         const cb_result = yield s3.getObject({ Bucket: bucket, Key: path }).promise();

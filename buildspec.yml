@@ -1,0 +1,11 @@
+version: 0.1
+
+phases:
+  build:
+    commands:
+      - NODE_PATH=/root/node_modules xvfb-run node parse_etc_meisai.js | tee etc.txt
+
+artifacts:
+  files:
+    - result.txt
+  discard-paths: yes

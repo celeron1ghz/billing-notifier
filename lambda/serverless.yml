@@ -48,13 +48,6 @@ resources:
       Properties:
         RoleName: "${{self:service}}-exec"
 
-    ResultStoreBucket:
-      Type: AWS::S3::Bucket
-      DependsOn:
-        - IamRoleLambdaExecution
-      Properties:
-       BucketName: "${{self:service}}"
-
     IamRoleStateMachineExecution:
       Type: AWS::IAM::Role
       Properties:
@@ -78,6 +71,68 @@ resources:
                     - { Fn::GetAtt: [CheckerLambdaFunction, Arn] }
                     - { Fn::GetAtt: [ViewcardLambdaFunction, Arn] }
                     - { Fn::GetAtt: [EtcLambdaFunction, Arn] }
+
+    IamRoleCodeBuildExecution:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: "${{self:service}}-codebuild"
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: codebuild.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: "${{self:service}}-codebuild-policy"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Resource:
+                    - "arn:aws:s3:::${{self:service}}/*"
+                  Action:
+                    - s3:PutObject
+                - Effect: Allow
+                  Resource: "*"
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                - Effect: Allow
+                  Resource:
+                    Fn::Join: [":", [ "arn:aws:dynamodb", { Ref: AWS::Region }, { Ref: AWS::AccountId }, "table/credential-store" ]]
+                  Action:
+                    - dynamodb:BatchGetItem
+                    - dynamodb:BatchWriteItem
+                    - dynamodb:DeleteItem
+                    - dynamodb:DescribeReservedCapacity
+                    - dynamodb:DescribeReservedCapacityOfferings
+                    - dynamodb:DescribeStream
+                    - dynamodb:DescribeTable
+                    - dynamodb:GetItem
+                    - dynamodb:GetRecords
+                    - dynamodb:GetShardIterator
+                    - dynamodb:ListStreams
+                    - dynamodb:ListTables
+                    - dynamodb:PutItem
+                    - dynamodb:Query
+                    - dynamodb:Scan
+                    - dynamodb:UpdateItem
+                - Effect: Allow
+                  Resource:
+                    Fn::Join: [":", [ "arn:aws:kms", { Ref: AWS::Region }, { Ref: AWS::AccountId }, "key/${{file(kms.js):kms.GENERAL_CREDSTASH_KMS_ID}}" ]]
+                  Action:
+                    - kms:Encrypt
+                    - kms:Decrypt
+                    - kms:ReEncrypt*
+                    - kms:GenerateDataKey*
+                    - kms:DescribeKey
+
+    ResultStoreBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+       BucketName: "${{self:service}}"
 
     CodeBuildPoller:
       Type: AWS::StepFunctions::StateMachine
@@ -103,3 +158,24 @@ resources:
                 "JobSuccess": { "Type": "Task", "Resource": "${ViewcardLambdaFunction.Arn}", "End": true }
               }
             }
+
+    BillingSiteParser:
+      Type: AWS::CodeBuild::Project
+      Properties:
+        Name: "${{self:service}}"
+        Description: ETC meisai site parser
+        Artifacts:
+          Type: S3
+          Location: billing-notifier
+          Name: codebuild_result
+          Packaging: NONE
+          NamespaceType: NONE
+        Environment:
+          Type: LINUX_CONTAINER
+          Image: "celeron1ghz/nightmare"
+          ComputeType: BUILD_GENERAL1_SMALL
+        ServiceRole: { Ref: IamRoleCodeBuildExecution }
+        Source:
+          Type: GITHUB
+          Location: "https://github.com/celeron1ghz/billing-notifier.git"
+        TimeoutInMinutes: 10
