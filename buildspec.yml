@@ -9,4 +9,5 @@ phases:
 artifacts:
   files:
     - etc.txt
+    - viewcard.txt
   discard-paths: yes
