@@ -4,7 +4,6 @@
   "description": "",
   "author": "",
   "dependencies": {
-    "serverless-step-functions": "^1.1.0",
     "slack-node": "^0.1.8",
     "vo": "^4.0.2"
   }
