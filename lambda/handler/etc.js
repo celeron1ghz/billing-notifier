@@ -9,7 +9,7 @@ const BUCKET = "billing-notifier";
 const post_message = (param) => new Promise((resolve,reject) => {
     const Slack   = require('slack-node');
     const slack   = new Slack();
-    slack.setWebhook(process.env.ETC_BILLING_NOTIFIER_SLACK_WEBHOOK_URL);
+    slack.setWebhook(process.env.BILLING_NOTIFIER_SLACK_WEBHOOK_URL);
     slack.webhook(param, (err,res) => {
         if (err) { reject(err) } else { resolve(res) }
     }) 

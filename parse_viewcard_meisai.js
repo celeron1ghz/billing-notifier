@@ -8,8 +8,8 @@ const cred = require('credstash-promise');
 
 vo(function*(){
     const url  = 'https://viewsnet.jp/';
-    const id   = yield cred.fetchCred('VIEWCARD_BILLING_NOTIFIER_ID');
-    const pass = yield cred.fetchCred('VIEWCARD_BILLING_NOTIFIER_PASSWORD');
+    const id   = yield cred.fetchCred('BILLING_NOTIFIER_VIEWCARD_ID');
+    const pass = yield cred.fetchCred('BILLING_NOTIFIER_VIEWCARD_PASSWORD');
 
     let result = [];
     nightmare.viewport(1000, 1000)

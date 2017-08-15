@@ -8,8 +8,8 @@ const cred = require('credstash-promise');
 
 vo(function*(){
     const url  = 'https://www2.etc-meisai.jp/etc/R?funccode=1013000000&nextfunc=1013000000';
-    const id   = yield cred.fetchCred('ETC_BILLING_NOTIFIER_ID');
-    const pass = yield cred.fetchCred('ETC_BILLING_NOTIFIER_PASSWORD');
+    const id   = yield cred.fetchCred('BILLING_NOTIFIER_ETC_ID');
+    const pass = yield cred.fetchCred('BILLING_NOTIFIER_ETC_PASSWORD');
 
     let result = [];
     nightmare.viewport(1000, 1000)
