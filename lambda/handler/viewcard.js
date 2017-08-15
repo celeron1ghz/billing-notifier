@@ -34,7 +34,7 @@ module.exports = (event, context, callback) => {
             });
 
         // running codebuild for getting new etc history
-        const path   = "codebuild_result/etc.txt";
+        const path   = "codebuild_result/viewcard.txt";
         console.log(`S3.getObject(${BUCKET}#${path})`);
 
         const cb_result = yield s3.getObject({ Bucket: BUCKET, Key: path }).promise();
