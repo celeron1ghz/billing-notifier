@@ -69,7 +69,7 @@ resources:
               Version: "2012-10-17"
               Statement:
                 - Effect: Allow
-                  Action: 
+                  Action:
                     - lambda:InvokeFunction
                   Resource:
                     - { Fn::GetAtt: [KickerLambdaFunction, Arn] }
@@ -134,6 +134,27 @@ resources:
                     - kms:GenerateDataKey*
                     - kms:DescribeKey
 
+    IamRoleCronExecution:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: "${{self:service}}-events"
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal: { Service: "events.amazonaws.com" }
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: "${{self:service}}-events-policy"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - states:StartExecution
+                  Resource:
+                    - { Ref: CodeBuildPoller }
+
     ResultStoreBucket:
       Type: AWS::S3::Bucket
       Properties:
@@ -143,8 +164,8 @@ resources:
       Type: AWS::StepFunctions::StateMachine
       Properties:
         RoleArn:
-          Fn::GetAtt: [ IamRoleStateMachineExecution, Arn ]   
-        DefinitionString: 
+          Fn::GetAtt: [ IamRoleStateMachineExecution, Arn ]
+        DefinitionString:
           Fn::Sub: |-
             {
               "Comment": "Polling codebuild running",
@@ -200,3 +221,13 @@ resources:
           Type: GITHUB
           Location: "https://github.com/celeron1ghz/billing-notifier.git"
         TimeoutInMinutes: 10
+
+    Cron:
+      Type: AWS::Events::Rule
+      Properties:
+        Name: "${{self:service}}-cron"
+        ScheduleExpression: cron(0 14 * * ? *)
+        Targets:
+          - Id: "${{self:service}}-cron-state"
+            Arn: { Ref: CodeBuildPoller }
+            RoleArn: { Fn::GetAtt: [IamRoleCronExecution, Arn] }
