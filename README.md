@@ -24,18 +24,18 @@ sls invoke -f main
  * `GENERAL_CREDSTASH_KMS_ID`: credstashで使うKMSのkey id
 
 
-## ETC利用照会サービス
-[ETC利用照会サービス](http://www.etc-meisai.jp) のデータを取得してSlackに投稿する。
-
 ### REQUIRED CREDSTASH VARIABLES in ETC meisai
+
+[ETC利用照会サービス](http://www.etc-meisai.jp) のデータを取得する際に必要
+
  * `BILLING_NOTIFIER_ETC_ID`: ETC利用照会サービスのユーザーID
  * `BILLING_NOTIFIER_ETC_PASSWORD`: ETC利用照会サービスのパスワード
 
 
-## VIEW's NET
-[VIEW's NET](http://www.jreast.co.jp/card/)のデータを取得してSlackに投稿する。
-
 ### REQUIRED CREDSTASH VARIABLES in VIEWCARD meisai
+
+[VIEW's NET](http://www.jreast.co.jp/card/)のデータを取得する際に必要
+
 * `BILLING_NOTIFIER_VIEWCARD_ID`: VIEW's NETのユーザーID
 * `BILLING_NOTIFIER_VIEWCARD_PASSWORD`: VIEW's NETのパスワード
 
