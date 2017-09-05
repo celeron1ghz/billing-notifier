@@ -1,8 +1,13 @@
 {
   "name": "billing-notifier",
   "version": "1.0.0",
-  "description": "",
+  "description": "Post billing info to slack",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/celeron1ghz/billing-notifier.git"
+  },
   "author": "",
+  "license": "ISC",
   "dependencies": {
     "slack-node": "^0.1.8",
     "vo": "^4.0.2"
