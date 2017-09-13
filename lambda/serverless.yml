@@ -53,6 +53,22 @@ resources:
       Properties:
         RoleName: "${{self:service}}-exec"
 
+    KickerLogGroup:
+      Properties:
+        RetentionInDays: 7
+
+    CheckerLogGroup:
+      Properties:
+        RetentionInDays: 7
+
+    EtcLogGroup:
+      Properties:
+        RetentionInDays: 7
+
+    ViewcardLogGroup:
+      Properties:
+        RetentionInDays: 7
+
     IamRoleStateMachineExecution:
       Type: AWS::IAM::Role
       Properties:
