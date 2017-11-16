@@ -2,7 +2,8 @@
 
 process.env.AWS_REGION = 'ap-northeast-1';
 
-const nightmare = new require('nightmare')({ show: true });
+//const nightmare = new require('nightmare')({ show: true });
+const nightmare = new require('nightmare')();
 const vo   = require('vo');
 const cred = require('credstash-promise');
 
