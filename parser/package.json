@@ -1,0 +1,11 @@
+{
+  "name": "nightmare",
+  "version": "1.0.0",
+  "description": "",
+  "dependencies": {
+    "aws-sdk": "^2.48.0",
+    "credstash-promise": "^2.1.2",
+    "nightmare": "^2.10.0",
+    "vo": "^4.0.2"
+  }
+}
