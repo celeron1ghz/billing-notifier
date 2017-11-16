@@ -178,7 +178,7 @@ resources:
                     { "Variable": "$.buildStatus", "StringEquals": "IN_PROGRESS", "Next": "JobWait" }
                   ]
                 },
-                "JobWait":    { "Type": "Wait", "Seconds": 5, "Next": "JobCheck" },
+                "JobWait":    { "Type": "Wait", "Seconds": 10, "Next": "JobCheck" },
                 "JobCalcDiff": {
                   "Type": "Parallel",
                   "Branches": [
