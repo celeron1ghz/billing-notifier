@@ -10,8 +10,8 @@ const ssm = new aws.SSM();
 
 vo(function*(){
     const url  = 'https://www2.etc-meisai.jp/etc/R?funccode=1013000000&nextfunc=1013000000';
-    const id   = (yield ssm.getParameter({ Name: '/etc_meisai/user_id',   WithDecryption: true }).promise() ).Parameter.Value;
-    const pass = (yield ssm.getParameter({ Name: '/etc_meisai/passoword', WithDecryption: true }).promise() ).Parameter.Value;
+    const id   = (yield ssm.getParameter({ Name: '/etc_meisai/user_id',  WithDecryption: true }).promise() ).Parameter.Value;
+    const pass = (yield ssm.getParameter({ Name: '/etc_meisai/password', WithDecryption: true }).promise() ).Parameter.Value;
 
     let result = [];
     nightmare.viewport(1000, 1000)
