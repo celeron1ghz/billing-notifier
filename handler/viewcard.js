@@ -3,20 +3,12 @@
 const vo  = require('vo');
 const aws = require('aws-sdk');
 const s3  = new aws.S3({ signatureVersion: "v4" });
+const ssm = new aws.SSM();
 
 const now = new Date();
 const BUCKET = "billing-notifier";
 const CODEBUILD_ARTIFACT_PATH = "codebuild_result/viewcard.txt";
 const S3_HISTORY_PATH = `viewcard/${now.getFullYear()}${ ("0"+(now.getMonth() + 1)).slice(-2) }.json`;
-
-const post_message = (param) => new Promise((resolve,reject) => {
-    const Slack   = require('slack-node');
-    const slack   = new Slack();
-    slack.setWebhook(process.env.BILLING_NOTIFIER_SLACK_WEBHOOK_URL);
-    slack.webhook(param, (err,res) => {
-        if (err) { reject(err) } else { resolve(res) }
-    }) 
-});
 
 function get_old_history()  {
     return vo(function*(){
@@ -91,11 +83,20 @@ module.exports = (event, context, callback) => {
                     text:  `¥${month_total[key]}-`,
                 });
 
-                yield post_message({
-                    username:    `VIEW Card Billing (${key})`,
-                    icon_emoji:  ':viewcard:',
-                    mrkdwn:      true,
-                    attachments: attaches,
+                const hook_url = (yield ssm.getParameter({ Name: '/slack/webhook/sensitive', WithDecryption: true }).promise() ).Parameter.Value;
+
+                yield new Promise((resolve,reject) => {
+                    const Slack   = require('slack-node');
+                    const slack   = new Slack();
+                    slack.setWebhook(hook_url);
+                    slack.webhook({
+                        username:    `VIEW Card Billing (${key})`,
+                        icon_emoji:  ':viewcard:',
+                        mrkdwn:      true,
+                        attachments: attaches,
+                    }, (err,res) => {
+                        if (err) { reject(err) } else { resolve(res) }
+                    })
                 });
             }
         }

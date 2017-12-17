@@ -3,17 +3,9 @@
 const vo  = require('vo');
 const aws = require('aws-sdk');
 const s3  = new aws.S3({ signatureVersion: "v4" });
+const ssm = new aws.SSM();
 
 const BUCKET = "billing-notifier";
-
-const post_message = (param) => new Promise((resolve,reject) => {
-    const Slack   = require('slack-node');
-    const slack   = new Slack();
-    slack.setWebhook(process.env.BILLING_NOTIFIER_SLACK_WEBHOOK_URL);
-    slack.webhook(param, (err,res) => {
-        if (err) { reject(err) } else { resolve(res) }
-    }) 
-});
 
 module.exports = (event, context, callback) => {
     vo(function*(){
@@ -81,11 +73,20 @@ module.exports = (event, context, callback) => {
             });
         }
 
-        yield post_message({
-            username:    'ETC Billing',
-            icon_emoji:  ':etc:',
-            mrkdwn:      true,
-            attachments: ret,
+        const hook_url = (yield ssm.getParameter({ Name: '/slack/webhook/sensitive', WithDecryption: true }).promise() ).Parameter.Value;
+
+        yield new Promise((resolve,reject) => {
+            const Slack   = require('slack-node');
+            const slack   = new Slack();
+            slack.setWebhook(hook_url);
+            slack.webhook({
+                username:    'ETC Billing',
+                icon_emoji:  ':etc:',
+                mrkdwn:      true,
+                attachments: ret,
+            }, (err,res) => {
+                if (err) { reject(err) } else { resolve(res) }
+            })
         });
 
         const save = yield s3.putObject({ Bucket: BUCKET, Key: filename, Body: JSON.stringify(new_history) }).promise();
