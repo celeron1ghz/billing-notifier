@@ -4,13 +4,14 @@ process.env.AWS_REGION = 'ap-northeast-1';
 
 //const nightmare = new require('nightmare')();
 const nightmare = new require('nightmare')({ show: true });
-const vo   = require('vo');
-const cred = require('credstash-promise');
+const vo  = require('vo');
+const aws = require('aws-sdk');
+const ssm = new aws.SSM();
 
 vo(function*(){
     const url  = 'https://www2.etc-meisai.jp/etc/R?funccode=1013000000&nextfunc=1013000000';
-    const id   = yield cred.fetchCred('BILLING_NOTIFIER_ETC_ID');
-    const pass = yield cred.fetchCred('BILLING_NOTIFIER_ETC_PASSWORD');
+    const id   = (yield ssm.getParameter({ Name: '/etc_meisai/user_id',  WithDecryption: true }).promise() ).Parameter.Value;
+    const pass = (yield ssm.getParameter({ Name: '/etc_meisai/passowrd', WithDecryption: true }).promise() ).Parameter.Value;
 
     let result = [];
     nightmare.viewport(1000, 1000)

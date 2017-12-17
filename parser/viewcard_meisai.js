@@ -4,13 +4,14 @@ process.env.AWS_REGION = 'ap-northeast-1';
 
 //const nightmare = new require('nightmare')({ show: true });
 const nightmare = new require('nightmare')();
-const vo   = require('vo');
-const cred = require('credstash-promise');
+const vo  = require('vo');
+const aws = require('aws-sdk');
+const ssm = new aws.SSM();
 
 vo(function*(){
     const url  = 'https://viewsnet.jp/';
-    const id   = yield cred.fetchCred('BILLING_NOTIFIER_VIEWCARD_ID');
-    const pass = yield cred.fetchCred('BILLING_NOTIFIER_VIEWCARD_PASSWORD');
+    const id   = (yield ssm.getParameter({ Name: '/viewcard/user_id',  WithDecryption: true }).promise() ).Parameter.Value;
+    const pass = (yield ssm.getParameter({ Name: '/viewcard/password', WithDecryption: true }).promise() ).Parameter.Value;
 
     let result = [];
     nightmare.viewport(1000, 1000)
