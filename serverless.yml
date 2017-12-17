@@ -42,13 +42,9 @@ functions:
   etc:
     handler: handler.etc
     description: calc etc's diff
-    environment:
-      BILLING_NOTIFIER_SLACK_WEBHOOK_URL: "${{file(kms.js):kms.BILLING_NOTIFIER_SLACK_WEBHOOK_URL}}"
   viewcard:
     handler: handler.viewcard
     description: calc viewcard's diff
-    environment:
-      BILLING_NOTIFIER_SLACK_WEBHOOK_URL: "${{file(kms.js):kms.BILLING_NOTIFIER_SLACK_WEBHOOK_URL}}"
 
 resources:
   Description: Parse credit card's billing site and post to slack
