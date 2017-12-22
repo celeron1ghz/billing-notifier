@@ -3,8 +3,8 @@ version: 0.1
 phases:
   build:
     commands:
-      - NODE_PATH=/root/node_modules Xvfb node parser/etc_meisai.js      | tee etc.txt
-      - NODE_PATH=/root/node_modules Xvfb node parser/viewcard_meisai.js | tee viewcard.txt
+      - NODE_PATH=/root/node_modules xvfb-run node parser/etc_meisai.js      | tee etc.txt
+      - NODE_PATH=/root/node_modules xvfb-run node parser/viewcard_meisai.js | tee viewcard.txt
 
 artifacts:
   files:
