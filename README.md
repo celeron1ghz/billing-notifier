@@ -12,17 +12,13 @@ parseを行う部分は最初Lambdaでやろうかと思いましたが、nightm
 #### 全体
  * `BILLING_NOTIFIER_SLACK_WEBHOOK_URL`: SlackのIncoming WebHook URL
 
-#### ETC meisai
-[ETC利用照会サービス](http://www.etc-meisai.jp) のデータを取得する際に必要
-
+#### [ETC利用照会サービス](http://www.etc-meisai.jp) 
  * `BILLING_NOTIFIER_ETC_ID`: ETC利用照会サービスのユーザーID
  * `BILLING_NOTIFIER_ETC_PASSWORD`: ETC利用照会サービスのパスワード
 
-#### VIEWCARD meisai
-[VIEW's NET](http://www.jreast.co.jp/card/)のデータを取得する際に必要
-
-* `BILLING_NOTIFIER_VIEWCARD_ID`: VIEW's NETのユーザーID
-* `BILLING_NOTIFIER_VIEWCARD_PASSWORD`: VIEW's NETのパスワード
+#### [VIEW's NET](http://www.jreast.co.jp/card/)
+ * `BILLING_NOTIFIER_VIEWCARD_ID`: VIEW's NETのユーザーID
+ * `BILLING_NOTIFIER_VIEWCARD_PASSWORD`: VIEW's NETのパスワード
 
 
 ### serverlessでセットアップ
