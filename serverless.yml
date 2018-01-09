@@ -219,7 +219,8 @@ resources:
     Cron:
       Type: AWS::Events::Rule
       Properties:
-        Name: "${{self:service}}-cron"
+        Name: "${{self:service}}"
+        Description: Handling billing notify
         ScheduleExpression: cron(0 14 * * ? *)
         Targets:
           - Id: "${{self:service}}-cron-state"
