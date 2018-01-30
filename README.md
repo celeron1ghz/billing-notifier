@@ -5,30 +5,25 @@ APIという便利なものは用意されていないサイトたちなので�
 
 parseを行う部分は最初Lambdaでやろうかと思いましたが、nightmareの動作に必要なランタイムを一式突っ込んだら容量オーバーでアップロードできなかったため、仕方なくDocker Containerが使えるCodeBuildで実行しています。
 
-## SETUP
-### 環境変数の設定
-下記の値をEC2 Parameter Storeに設定する。
 
-#### 全体
+## SETUP ENVIRONMENT VARIABLES
+Set these value to `EC2 Parameter Store`.
+
+#### GLOBAL
  * `BILLING_NOTIFIER_SLACK_WEBHOOK_URL`: SlackのIncoming WebHook URL
-
-#### [ETC利用照会サービス](http://www.etc-meisai.jp) 
- * `BILLING_NOTIFIER_ETC_ID`: ETC利用照会サービスのユーザーID
- * `BILLING_NOTIFIER_ETC_PASSWORD`: ETC利用照会サービスのパスワード
-
+#### [ETC Meisai Service](http://www.etc-meisai.jp) 
+ * `/etc_meisai/user_id`: ETC meisai service's user_id
+ * `/etc_meisai/password`: ETC meisai service's password
 #### [VIEW's NET](http://www.jreast.co.jp/card/)
- * `BILLING_NOTIFIER_VIEWCARD_ID`: VIEW's NETのユーザーID
- * `BILLING_NOTIFIER_VIEWCARD_PASSWORD`: VIEW's NETのパスワード
+ * `/viewcard/user_id`: VIEW's NET user_id
+ * `/viewcard/password`: VIEW's NET password
 
 
-### serverlessでセットアップ
+## SETUP SERVERLESS SCRIPT
 ```
 git clone https://github.com/celeron1ghz/billing-notifier.git
 cd billing-notifier/lambda
 sls deploy
-
-## テスト実行
-sls invoke -f main
 ```
 
 
