@@ -10,7 +10,7 @@ parseを行う部分は最初Lambdaでやろうかと思いましたが、nightm
 Set these value to `EC2 Parameter Store`.
 
 #### GLOBAL
- * `BILLING_NOTIFIER_SLACK_WEBHOOK_URL`: SlackのIncoming WebHook URL
+ * `/slack/webhook/dev`: SlackのIncoming WebHook URL
 #### [ETC Meisai Service](http://www.etc-meisai.jp) 
  * `/etc_meisai/user_id`: ETC meisai service's user_id
  * `/etc_meisai/password`: ETC meisai service's password
