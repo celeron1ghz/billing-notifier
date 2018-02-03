@@ -1,7 +1,5 @@
 'use strict';
 
-const vo  = require('vo');
-
 class ViewCardParser {
     constructor(user_id, password) {
         this.user_id  = user_id;
@@ -9,6 +7,7 @@ class ViewCardParser {
     }
 
     parse() {
+        const vo = require('vo');
         const nightmare = new require('nightmare')({ show: true });
         //const nightmare = new require('nightmare')();
         const id   = this.user_id
@@ -77,14 +76,4 @@ class ViewCardParser {
     }
 }
 
-vo(function*(){
-    process.env.AWS_REGION = 'ap-northeast-1';
-    const aws = require('aws-sdk');
-    const ssm = new aws.SSM();
-    const id   = (yield ssm.getParameter({ Name: '/viewcard/user_id',  WithDecryption: true }).promise() ).Parameter.Value;
-    const pass = (yield ssm.getParameter({ Name: '/viewcard/password', WithDecryption: true }).promise() ).Parameter.Value;
-    const ret = yield new ViewCardParser(id, pass)
-        .parse()
-        .catch(err => { throw new Error(err) });
-    console.log(JSON.stringify(ret))
-}).catch(err => { throw new Error(err) })
+module.exports = ViewCardParser;

@@ -1,7 +1,5 @@
 'use strict';
 
-const vo  = require('vo');
-
 class EtcMeisaiParser {
     constructor(user_id, password) {
         this.user_id  = user_id;
@@ -9,6 +7,7 @@ class EtcMeisaiParser {
     }
 
     parse() {
+        const vo = require('vo');
         //const nightmare = new require('nightmare')();
         const nightmare = new require('nightmare')({ show: true });
         const id   = this.user_id;
@@ -86,14 +85,4 @@ class EtcMeisaiParser {
     }
 }
 
-vo(function*(){
-    process.env.AWS_REGION = 'ap-northeast-1';
-    const aws = require('aws-sdk');
-    const ssm = new aws.SSM();
-    const id   = (yield ssm.getParameter({ Name: '/etc_meisai/user_id',  WithDecryption: true }).promise() ).Parameter.Value;
-    const pass = (yield ssm.getParameter({ Name: '/etc_meisai/password', WithDecryption: true }).promise() ).Parameter.Value;
-    const ret = yield new EtcMeisaiParser(id, pass)
-        .parse()
-        .catch(err => { throw new Error(err) })
-    console.log(JSON.stringify(ret))
-}).catch(err => { throw new Error(err) })
+module.exports = EtcMeisaiParser;
