@@ -35,7 +35,7 @@ class EtcMeisaiParser {
             const aaa = yield nightmare.screenshot("/tmp/2.jpg")
             console.log(aaa)
 
-            //yield s3.putObject({ Bucket: 'billing-notifier', Key: '2.jpg', Body: fs.readFileSync('/tmp/2.jpg') }).promise();
+            yield s3.putObject({ Bucket: 'billing-notifier', Key: '2.jpg', Body: fs.readFileSync('/tmp/2.jpg') }).promise();
 
             
             while (true)   {
