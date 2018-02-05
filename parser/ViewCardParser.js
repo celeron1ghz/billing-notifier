@@ -77,7 +77,7 @@ class ViewCardParser {
 
             while (true)   {
                 const document = yield nightmare.evaluate((arg,done) => {
-                    setTimeout(() => done(null,document)), 1000);
+                    setTimeout(() => done(null,document), 1000);
                 }, null);
                 console.log("docc", document);
                 const meisai = self.parse_page(document);
