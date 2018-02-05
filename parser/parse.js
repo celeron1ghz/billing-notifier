@@ -1,6 +1,9 @@
-const vo = require('vo');
 const ViewCardParser  = require('./ViewCardParser');
 const EtcMeisaiParser = require('./EtcMeisaiParser');
+
+const vo = require('vo');
+const aws = require('aws-sdk');
+const s3  = new aws.S3({ region: 'ap-northeast-1' });
 
 const config = [
     {
@@ -27,7 +30,8 @@ vo(function*(){
 
         const parser = c.type === "etc" ? new EtcMeisaiParser(id,pass) : new ViewCardParser(id,pass);
         const ret = yield parser.parse().catch(err => { console.log("Error on loop:", err); return [] });
-        console.log(" ==> ", c.type, JSON.stringify(ret))
+        //console.log(" ==> ", c.type, JSON.stringify(ret))
+        yield s3.putObject({ Bucket: 'billing-notifier', Key: "result/" + c.type + ".txt", Body: JSON.stringify(ret) }).promise();
     }
 
 }).catch(err => { console.log("Error on global:", err) })
