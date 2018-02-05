@@ -28,14 +28,14 @@ class EtcMeisaiParser {
                 .type("input[name=risPassword]", pass)
                 .click("input[name=focusTarget]")
                 .wait("table.meisaiinfo")
-                .screenshot("/tmp/1.jpg")
                 // choose previous month
                 .click("table.meisaiinfo > tbody > tr:nth-child(3) > td > table:nth-child(3) > tbody > tr > td:nth-last-child(3) button")
                 .wait(1000)
-                .screenshot("/tmp/2.jpg")
+                
+            nightmare.screenshot("/tmp/2.jpg").run(() => { console.log("screen shot!") })
 
-            yield s3.putObject({ Bucket: 'billing-notifier', Key: '1.jpg', Body: fs.readFileSync('/tmp/1.jpg') }).promise();
             yield s3.putObject({ Bucket: 'billing-notifier', Key: '2.jpg', Body: fs.readFileSync('/tmp/2.jpg') }).promise();
+
             
             while (true)   {
                 const meisai = yield nightmare.evaluate(function () {
