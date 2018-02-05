@@ -21,7 +21,8 @@ class ViewCardParser {
         .wait(1000)
     }
     
-    parse_page(document) {
+    parse_page(self, document) {
+        console.log("self", self)
         console.log("doc", document)
         const css = (parent, selector) => [].slice.apply(parent.querySelectorAll(selector));
         const trs = css(document, "div#DivDetailInfo table tbody tr");
@@ -75,10 +76,7 @@ class ViewCardParser {
             self.login(nightmare)
 
             while (true)   {
-                const document = yield nightmare.evaluate((s,done) => {
-                    done(null, s.parse_page(document))
-                },self);
-                
+                const document = yield nightmare.evaluate(self.parse_page, self);
                 const meisai = [];
                 meisai.shift();
                 result = result.concat(meisai);
