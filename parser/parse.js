@@ -3,11 +3,13 @@ const ViewCardParser  = require('./ViewCardParser');
 const EtcMeisaiParser = require('./EtcMeisaiParser');
 
 const config = [
+    /*
     {
         type: 'etc',
         user_id: '/etc_meisai/user_id',
         password: '/etc_meisai/password',
     },
+    */
     {
         type: 'viewcard',
         user_id: '/viewcard/user_id',
