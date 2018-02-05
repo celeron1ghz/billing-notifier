@@ -59,7 +59,9 @@ class ViewCardParser {
         const s3  = new aws.S3({ region: 'ap-northeast-1' });
         const fs = require('fs');
         const url  = this.login_page_url;
+        
         const self = this;
+        const parse_page = () => { this.parse_page(document) };
 
         return vo(function*(){
             let result = [];
@@ -72,7 +74,6 @@ class ViewCardParser {
             self.login(nightmare)
 
             while (true)   {
-                const parse_page = function(){ self.parse_page(document) };
                 const meisai = yield nightmare.evaluate(parse_page);
 
                 meisai.shift();
