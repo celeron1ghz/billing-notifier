@@ -63,7 +63,6 @@ class ViewCardParser {
         
         const self = this;
 
-
         return vo(function*(){
             let result = [];
 
@@ -76,9 +75,9 @@ class ViewCardParser {
             self.login(nightmare)
 
             while (true)   {
-                const document = yield nightmare.evaluate((self,done) => {
-                    done(null, self.parse_page(document))
-                }, self);
+                const document = yield nightmare.evaluate((s,done) => {
+                    done(null, s.parse_page(document))
+                },self);
                 
                 const meisai = [];
                 meisai.shift();
