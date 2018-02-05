@@ -20,6 +20,36 @@ class ViewCardParser {
         .click("a#LnkYotei")
         .wait(1000)
     }
+    
+    parse_page(document) {
+        const css = (parent, selector) => [].slice.apply(parent.querySelectorAll(selector));
+        const trs = css(document, "div#DivDetailInfo table tbody tr");
+        trs.shift();
+
+        return trs.map(function(tr){
+            const td1 = css(tr, "td:nth-child(1)");
+            const td2 = css(tr, "td:nth-child(2)");
+            const td3 = css(tr, "td:nth-child(3)");
+            const td4 = css(tr, "td:nth-child(4)");
+
+            return {
+                date:    (td1.length != 0 ? css(td1[0], "span").map(e => e.textContent).join("/") : ""),
+                card_no: (td2.length != 0 ? css(td2[0], "span")[0].innerHTML : ""),
+                shop:    (td3.length != 0 ? css(td3[0], "strong")[0].textContent : ""),
+                price:   (td4.length != 0 ? css(td4[0], "strong")[0].textContent.replace(/,/g, "") : ""),
+            };
+        });
+    }
+    
+    has_next_page(document) {
+      return document.querySelector("#LnkNextBottom")
+    }
+    
+    goto_next_page(nightmare) {
+      nightmare.click("#LnkNextBottom")
+        .wait("div#DivDetailInfo")
+        .wait(1000);
+    }
 
     parse() {
         const vo = require('vo');
@@ -42,45 +72,22 @@ class ViewCardParser {
             self.login(nightmare)
 
             while (true)   {
-                const meisai = yield nightmare.evaluate(function () {
-                    const css = (parent, selector) => [].slice.apply(parent.querySelectorAll(selector));
-
-                    const trs = css(document, "div#DivDetailInfo table tbody tr");
-                    trs.shift();
-                    console.log(" ==> FETCH ROWS ", trs.length);
-
-                    return trs.map(function(tr){
-                        const td1 = css(tr, "td:nth-child(1)");
-                        const td2 = css(tr, "td:nth-child(2)");
-                        const td3 = css(tr, "td:nth-child(3)");
-                        const td4 = css(tr, "td:nth-child(4)");
-
-                        return {
-                            date:    (td1.length != 0 ? css(td1[0], "span").map(e => e.textContent).join("/") : ""),
-                            card_no: (td2.length != 0 ? css(td2[0], "span")[0].innerHTML : ""),
-                            shop:    (td3.length != 0 ? css(td3[0], "strong")[0].textContent : ""),
-                            price:   (td4.length != 0 ? css(td4[0], "strong")[0].textContent.replace(/,/g, "") : ""),
-                        };
-                    });
-                });
+                const meisai = yield nightmare.evaluate(() => { self.parse_page(document) });
 
                 meisai.shift();
                 result = result.concat(meisai);
-                console.log(" ==> TOTAL ROWS ", result.length);
+                console.log(" ==> PARSED ROWS ", meisai.length);
+                console.log(" ==> TOTAL  ROWS ", result.length);
 
-                const next_button = yield nightmare.evaluate(
-                    () => document.querySelector("#LnkNextBottom")
-                );
+                const next_button = yield nightmare.evaluate(() => { self.has_next_page(document) });
 
                 if (!next_button)  {
                     console.log(" ==> LAST");
                     break;
                 }
 
-                console.log(" ==> NEXT", next_button)
-                nightmare.click("#LnkNextBottom")
-                    .wait("div#DivDetailInfo")
-                    .wait(1000);
+                console.log(" ==> NEXT")
+                self.goto_next_page(nightmare)
             }
 
             yield nightmare.end();
