@@ -53,36 +53,30 @@ class ViewCardParser {
 
     parse() {
         const vo = require('vo');
-        //const nightmare = new require('nightmare')({ show: true });
-        const nightmare = new require('nightmare')();
-        const aws = require('aws-sdk');
-        const s3  = new aws.S3({ region: 'ap-northeast-1' });
-        const fs = require('fs');
-        const url  = this.login_page_url;
-        
+        const nightmare = new require('nightmare')(/* { show: true } */);
+        const { JSDOM } = require('jsdom');
         const self = this;
 
         return vo(function*(){
-            let result = [];
+            const result = [];
 
-            console.log("FIRST_PAGE", url);
             nightmare.viewport(1000, 1000)
                 .useragent("Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36")
-                .goto(url)
+                .goto(self.login_page_url)
 
-            console.log("LOGIN");
+            console.log(" ==> LOGIN");
             self.login(nightmare)
 
             while (true)   {
                 const html = yield nightmare.evaluate(() => document.body.innerHTML);
-                const document = {}; // new jsdom()
-                const meisai = []; // this.parse_page(document)
+                const { document } = new JSDOM(html).window;
+
+                const meisai = self.parse_page(document);
                 meisai.shift();
-                result = result.concat(meisai);
+                result.push(...meisai);
                 
-                console.log(" ==> PARSED ROWS ", meisai.length);
-                console.log(" ==> TOTAL  ROWS ", result.length);
-                const next_button = null; // this.has_next_page(document)
+                console.log(" ==> TOTAL ROWS IS", result.length);
+                const next_button = self.has_next_page(document);
 
                 if (!next_button)  {
                     console.log(" ==> LAST");
