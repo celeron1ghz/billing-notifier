@@ -66,10 +66,7 @@ class ViewCardParser {
 
         return vo(function*(){
             let result = [];
-            
-            const parse_page    = self.parse_page.bind(self);
-            const has_next_page = self.has_next_page.bind(self);
-            
+
             console.log("FIRST_PAGE", url);
             nightmare.viewport(1000, 1000)
                 .useragent("Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36")
@@ -80,6 +77,7 @@ class ViewCardParser {
 
             while (true)   {
                 const document = yield nightmare.evaluate((arg,done) => { done(null,document) }, null);
+                console.log("docc", document);
                 const meisai = self.parse_page(document);
                 meisai.shift();
                 result = result.concat(meisai);
