@@ -78,8 +78,7 @@ class ViewCardParser {
             self.login(nightmare)
 
             while (true)   {
-                const document = yield nightmare.evaluate((a,b) => { b(document) }, "test");
-                console.log("3", document);
+                const document = yield nightmare.evaluate((arg,done) => { done(null,document) }, null);
                 const meisai = self.parse_page(document);
                 meisai.shift();
                 result = result.concat(meisai);
