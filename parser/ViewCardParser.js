@@ -2,8 +2,23 @@
 
 class ViewCardParser {
     constructor(user_id, password) {
-        this.user_id  = user_id;
-        this.password = password;
+      this.user_id  = user_id;
+      this.password = password;
+      this.login_page_url = 'https://viewsnet.jp/';
+    }
+    
+    login(nightmare) {
+      nightmare
+        .type("input[name=id]", this.user_id)
+        .type("input[name=pass]", this.password)
+        .click("input[type=image]")
+        .wait(1000)
+        // 
+        .click("a#vucGlobalNavi_LnkV0300_001Header")
+        .wait(1000)
+        //
+        .click("a#LnkYotei")
+        .wait(1000)
     }
 
     parse() {
@@ -13,28 +28,18 @@ class ViewCardParser {
         const aws = require('aws-sdk');
         const s3  = new aws.S3({ region: 'ap-northeast-1' });
         const fs = require('fs');
-        const id   = this.user_id
-        const pass = this.password;
+        const url  = this.login_page_url;
+        const self = this;
 
         return vo(function*(){
-            const url  = 'https://viewsnet.jp/';
             let result = [];
             
             console.log("FETCH", url);
             nightmare.viewport(1000, 1000)
                 .useragent("Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36")
                 .goto(url)
-                // login
-                .type("input[name=id]", id)
-                .type("input[name=pass]", pass)
-                .click("input[type=image]")
-                .wait(1000)
-                // 
-                .click("a#vucGlobalNavi_LnkV0300_001Header")
-                .wait(1000)
-                //
-                .click("a#LnkYotei")
-                .wait(1000)
+
+            self.login(nightmare)
 
             while (true)   {
                 const meisai = yield nightmare.evaluate(function () {
