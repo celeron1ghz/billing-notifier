@@ -29,18 +29,13 @@ class ViewCardParser {
                 .type("input[name=pass]", pass)
                 .click("input[type=image]")
                 .wait(1000)
-                .screenshot("/tmp/view1.jpg")
                 // 
                 .click("a#vucGlobalNavi_LnkV0300_001Header")
                 .wait(1000)
                 //
                 .click("a#LnkYotei")
                 .wait(1000)
-                .screenshot("/tmp/view2.jpg")
 
-            yield s3.putObject({ Bucket: 'billing-notifier', Key: 'view1.jpg', Body: fs.readFileSync('/tmp/view1.jpg') }).promise();
-            yield s3.putObject({ Bucket: 'billing-notifier', Key: 'view2.jpg', Body: fs.readFileSync('/tmp/view2.jpg') }).promise();
-            
             while (true)   {
                 const meisai = yield nightmare.evaluate(function () {
                     const css = (parent, selector) => [].slice.apply(parent.querySelectorAll(selector));
