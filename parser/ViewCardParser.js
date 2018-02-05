@@ -61,7 +61,7 @@ class ViewCardParser {
         const url  = this.login_page_url;
         
         const self = this;
-        const parse_page = () => { self.parse_page(document) };
+        const parse_page = self.parse_page.bind(this);
 
         return vo(function*(){
             let result = [];
