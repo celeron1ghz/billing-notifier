@@ -28,7 +28,9 @@ class ViewCardParser {
         const trs = css(document, "div#DivDetailInfo table tbody tr");
         trs.shift();
 
-        done( trs.map(function(tr){
+        done(null, "popopo");
+        /*
+        done(null, trs.map(function(tr){
             const td1 = css(tr, "td:nth-child(1)");
             const td2 = css(tr, "td:nth-child(2)");
             const td3 = css(tr, "td:nth-child(3)");
@@ -41,6 +43,7 @@ class ViewCardParser {
                 price:   (td4.length != 0 ? css(td4[0], "strong")[0].textContent.replace(/,/g, "") : ""),
             };
         }) );
+        */
     }
     
     has_next_page(document) {
@@ -76,7 +79,8 @@ class ViewCardParser {
             self.login(nightmare)
 
             while (true)   {
-                const document = yield nightmare.evaluate(self.parse_page, self);
+                const document = yield nightmare.evaluate(self.parse_page.bind(self), self);
+                console.log(document);
                 const meisai = [];
                 meisai.shift();
                 result = result.concat(meisai);
