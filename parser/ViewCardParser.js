@@ -22,6 +22,7 @@ class ViewCardParser {
     }
     
     parse_page(document) {
+        console.log("doc", document)
         const css = (parent, selector) => [].slice.apply(parent.querySelectorAll(selector));
         const trs = css(document, "div#DivDetailInfo table tbody tr");
         trs.shift();
