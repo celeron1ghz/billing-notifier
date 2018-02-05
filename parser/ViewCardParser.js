@@ -15,8 +15,9 @@ class ViewCardParser {
 
         return vo(function*(){
             const url  = 'https://viewsnet.jp/';
-
             let result = [];
+            
+            console.log("FETCH", url);
             nightmare.viewport(1000, 1000)
                 .useragent("Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36")
                 .goto(url)
@@ -62,9 +63,11 @@ class ViewCardParser {
                 );
 
                 if (!next_button)  {
+                    console.log("LAST");
                     break;
                 }
 
+                console.log("NEXT", next_button)
                 nightmare.click("#LnkNextBottom")
                     .wait("div#DivDetailInfo")
                     .wait(1000);
