@@ -21,12 +21,14 @@ vo(function*(){
     const ssm = new aws.SSM();
 
     for (const c of config) {
+        console.log(c.type);
         const id   = (yield ssm.getParameter({ Name: c.user_id,  WithDecryption: true }).promise() ).Parameter.Value;
         const pass = (yield ssm.getParameter({ Name: c.password, WithDecryption: true }).promise() ).Parameter.Value;
 
+        console.log(" ==> parsing...");
         const parser = c.type === "etc" ? new EtcMeisaiParser(id,pass) : new ViewCardParser(id,pass);
-        const ret = yield parser.parse().catch(err => { throw new Error(err) });
-        console.log(c.type, JSON.stringify(ret))
+        const ret = yield parser.parse().catch(err => { console.log(err) });
+        console.log(" ==> ", c.type, JSON.stringify(ret))
     }
 
 }).catch(err => { throw new Error(err) })
