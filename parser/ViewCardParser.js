@@ -61,11 +61,13 @@ class ViewCardParser {
         const url  = this.login_page_url;
         
         const self = this;
-        const parse_page    = this.parse_page.bind(this);
-        const has_next_page = this.has_next_page.bind(this);
+
 
         return vo(function*(){
             let result = [];
+            
+            const parse_page    = self.parse_page.bind(self);
+            const has_next_page = self.has_next_page.bind(self);
             
             console.log("FIRST_PAGE", url);
             nightmare.viewport(1000, 1000)
