@@ -8,8 +8,8 @@ class ViewCardParser {
 
     parse() {
         const vo = require('vo');
-        const nightmare = new require('nightmare')({ show: true });
-        //const nightmare = new require('nightmare')();
+        //const nightmare = new require('nightmare')({ show: true });
+        const nightmare = new require('nightmare')();
         const id   = this.user_id
         const pass = this.password;
 
