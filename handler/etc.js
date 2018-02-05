@@ -25,7 +25,7 @@ module.exports = (event, context, callback) => {
                 return [];
             });
 
-        const path   = "codebuild_result/etc.txt";
+        const path   = "result/etc.txt";
         console.log(`S3.getObject(${BUCKET}#${path})`);
 
         const cb_result = yield s3.getObject({ Bucket: BUCKET, Key: path }).promise();
