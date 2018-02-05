@@ -61,16 +61,18 @@ class ViewCardParser {
         const url  = this.login_page_url;
         
         const self = this;
-        const parse_page = self.parse_page.bind(this);
+        const parse_page    = this.parse_page.bind(this);
+        const has_next_page = this.has_next_page.bind(this);
 
         return vo(function*(){
             let result = [];
             
-            console.log("FETCH", url);
+            console.log("FIRST_PAGE", url);
             nightmare.viewport(1000, 1000)
                 .useragent("Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36")
                 .goto(url)
 
+            console.log("LOGIN");
             self.login(nightmare)
 
             while (true)   {
@@ -81,7 +83,7 @@ class ViewCardParser {
                 console.log(" ==> PARSED ROWS ", meisai.length);
                 console.log(" ==> TOTAL  ROWS ", result.length);
 
-                const next_button = yield nightmare.evaluate(function(){ self.has_next_page(document) });
+                const next_button = yield nightmare.evaluate(function(){ has_next_page(document) });
 
                 if (!next_button)  {
                     console.log(" ==> LAST");
