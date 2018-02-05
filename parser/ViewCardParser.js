@@ -78,14 +78,14 @@ class ViewCardParser {
             self.login(nightmare)
 
             while (true)   {
-                const meisai = yield nightmare.evaluate(() => { parse_page(document) });
-
+                const document = yield nightmare.evaluate((selector, done) => { done(document) });
+                const meisai = self.parse_page(document);
                 meisai.shift();
                 result = result.concat(meisai);
                 console.log(" ==> PARSED ROWS ", meisai.length);
                 console.log(" ==> TOTAL  ROWS ", result.length);
 
-                const next_button = yield nightmare.evaluate(() => { has_next_page(document) });
+                const next_button = yield nightmare.evaluate((selector, done) => { has_next_page(document) });
 
                 if (!next_button)  {
                     console.log(" ==> LAST");
