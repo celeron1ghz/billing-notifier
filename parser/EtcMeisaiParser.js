@@ -32,11 +32,9 @@ class EtcMeisaiParser {
                 .click("table.meisaiinfo > tbody > tr:nth-child(3) > td > table:nth-child(3) > tbody > tr > td:nth-last-child(3) button")
                 .wait(1000)
                 
-            const aaa = yield nightmare.screenshot("/tmp/2.jpg")
-            console.log(aaa)
-
-            yield s3.putObject({ Bucket: 'billing-notifier', Key: '2.jpg', Body: fs.readFileSync('/tmp/2.jpg') }).promise();
-
+            // for debugging
+            //yield nightmare.screenshot("/tmp/2.jpg")
+            //yield s3.putObject({ Bucket: 'billing-notifier', Key: '2.jpg', Body: fs.readFileSync('/tmp/2.jpg') }).promise();
             
             while (true)   {
                 const meisai = yield nightmare.evaluate(function () {
