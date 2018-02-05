@@ -21,14 +21,14 @@ class ViewCardParser {
         .wait(1000)
     }
     
-    parse_page(self, document) {
+    parse_page(self, done) {
         console.log("self", self)
         console.log("doc", document)
         const css = (parent, selector) => [].slice.apply(parent.querySelectorAll(selector));
         const trs = css(document, "div#DivDetailInfo table tbody tr");
         trs.shift();
 
-        return trs.map(function(tr){
+        done( trs.map(function(tr){
             const td1 = css(tr, "td:nth-child(1)");
             const td2 = css(tr, "td:nth-child(2)");
             const td3 = css(tr, "td:nth-child(3)");
@@ -40,7 +40,7 @@ class ViewCardParser {
                 shop:    (td3.length != 0 ? css(td3[0], "strong")[0].textContent : ""),
                 price:   (td4.length != 0 ? css(td4[0], "strong")[0].textContent.replace(/,/g, "") : ""),
             };
-        });
+        }) );
     }
     
     has_next_page(document) {
