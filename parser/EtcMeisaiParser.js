@@ -8,6 +8,9 @@ class EtcMeisaiParser {
 
     parse() {
         const vo = require('vo');
+        const aws = require('aws-sdk');
+        const s3  = new aws.S3({ region: 'ap-northeast-1' });
+        const fs = require('fs');
         //const nightmare = new require('nightmare')();
         const nightmare = new require('nightmare')({ show: true });
         const id   = this.user_id;
@@ -25,10 +28,15 @@ class EtcMeisaiParser {
                 .type("input[name=risPassword]", pass)
                 .click("input[name=focusTarget]")
                 .wait("table.meisaiinfo")
+                .screenshot("/tmp/1.jpg")
                 // choose previous month
                 .click("table.meisaiinfo > tbody > tr:nth-child(3) > td > table:nth-child(3) > tbody > tr > td:nth-last-child(3) button")
                 .wait(1000)
+                .screenshot("/tmp/2.jpg")
 
+            yield s3.putObject({ Bucket: 'billing-notifier', Key: '1.jpg', Body: fs.readFileSync('/tmp/1.jpg') }).promise();
+            yield s3.putObject({ Bucket: 'billing-notifier', Key: '2.jpg', Body: fs.readFileSync('/tmp/2.jpg') }).promise();
+            
             while (true)   {
                 const meisai = yield nightmare.evaluate(function () {
                     const css     = (parent, selector) => [].slice.apply(parent.querySelectorAll(selector));
