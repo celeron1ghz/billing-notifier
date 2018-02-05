@@ -39,6 +39,7 @@ class ViewCardParser {
 
                     const trs = css(document, "div#DivDetailInfo table tbody tr");
                     trs.shift();
+                    console.log(" ==> FETCH ROWS ", trs.length);
 
                     return trs.map(function(tr){
                         const td1 = css(tr, "td:nth-child(1)");
@@ -57,17 +58,18 @@ class ViewCardParser {
 
                 meisai.shift();
                 result = result.concat(meisai);
+                console.log(" ==> TOTAL ROWS ", result.length);
 
                 const next_button = yield nightmare.evaluate(
                     () => document.querySelector("#LnkNextBottom")
                 );
 
                 if (!next_button)  {
-                    console.log("LAST");
+                    console.log(" ==> LAST");
                     break;
                 }
 
-                console.log("NEXT", next_button)
+                console.log(" ==> NEXT", next_button)
                 nightmare.click("#LnkNextBottom")
                     .wait("div#DivDetailInfo")
                     .wait(1000);
