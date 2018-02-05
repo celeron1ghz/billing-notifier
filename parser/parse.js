@@ -29,8 +29,8 @@ vo(function*(){
 
         console.log(" ==> parsing...");
         const parser = c.type === "etc" ? new EtcMeisaiParser(id,pass) : new ViewCardParser(id,pass);
-        const ret = yield parser.parse().catch(err => { throw err });
+        const ret = yield parser.parse().catch(err => { console.log("Error on loop:", err); return [] });
         console.log(" ==> ", c.type, JSON.stringify(ret))
     }
 
-}).catch(err => { throw new Error(err) })
+}).catch(err => { console.log("Error on global:", err) })
