@@ -16,8 +16,8 @@ class EtcMeisaiParser extends PageParser {
         .click("input[name=focusTarget]")
         .wait("table.meisaiinfo")
         // choose previous month
-        .click("table.meisaiinfo > tbody > tr:nth-child(3) > td > table:nth-child(3) > tbody > tr > td:nth-last-child(3) button")
-        .wait(1000)
+        //.click("table.meisaiinfo > tbody > tr:nth-child(3) > td > table:nth-child(3) > tbody > tr > td:nth-last-child(3) button")
+        //.wait(1000)
     }
 
     parse_page(document) {
