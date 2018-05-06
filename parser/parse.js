@@ -8,13 +8,13 @@ const s3  = new aws.S3({ region: 'ap-northeast-1' });
 const config = [
     {
         type: 'etc',
-        user_id: '/etc_meisai/user_id',
-        password: '/etc_meisai/password',
+        user_id: '/webservice/etc_meisai/user_id',
+        password: '/webservice/etc_meisai/password',
     },
     {
         type: 'viewcard',
-        user_id: '/viewcard/user_id',
-        password: '/viewcard/password',
+        user_id: '/webservice/viewcard/user_id',
+        password: '/webservice/viewcard/password',
     },
 ];
 
