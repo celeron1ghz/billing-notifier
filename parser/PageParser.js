@@ -13,12 +13,11 @@ class PageParser {
     goto_next_page(nightmare)   { throw new Error("abstract method") }
 
     parse() {
-      const vo = require('vo');
       const nightmare = new require('nightmare')({ show: true });
       const { JSDOM } = require('jsdom');
       const self = this;
 
-      return vo(function*(){
+      return (async () => {
         const result = [];
 
         nightmare.viewport(1000, 1000)
@@ -29,28 +28,28 @@ class PageParser {
         self.login(nightmare)
 
         while (true)   {
-          const html = yield nightmare.evaluate(() => document.body.innerHTML);
+          const html = await nightmare.evaluate(() => document.body.innerHTML);
           const { document } = new JSDOM(html).window;
 
           const meisai = self.parse_page(document);
           meisai.shift();
           result.push(...meisai);
                 
-          console.log(" ==> TOTAL ROWS IS", result.length);
+          console.log(" => GOT ", result.length);
           const next_button = self.has_next_page(document);
 
           if (!next_button)  {
-            console.log(" ==> LAST");
+            console.log(" => LAST");
             break;
           }
 
-          console.log(" ==> NEXT")
+          console.log(" => NEXT")
           self.goto_next_page(nightmare)
         }
 
-        yield nightmare.end();
+        await nightmare.end();
         return result;
-      })
+      })();
     }
 }
 

@@ -1,9 +1,10 @@
 const ViewCardParser  = require('./ViewCardParser');
 const EtcMeisaiParser = require('./EtcMeisaiParser');
 
-const vo = require('vo');
+process.env.AWS_REGION = 'ap-northeast-1';
 const aws = require('aws-sdk');
 const s3  = new aws.S3({ region: 'ap-northeast-1' });
+const ssm = new aws.SSM();
 
 const config = [
     {
@@ -18,20 +19,19 @@ const config = [
     },
 ];
 
-vo(function*(){
-    process.env.AWS_REGION = 'ap-northeast-1';
-    const aws = require('aws-sdk');
-    const ssm = new aws.SSM();
+(async () => {
+    try {
+        for (const c of config) {
+            console.log("PARSE:", c.type);
+            const id   = await ssm.getParameter({ Name: c.user_id,  WithDecryption: true }).promise().then(d => d.Parameter.Value);
+            const pass = await ssm.getParameter({ Name: c.password, WithDecryption: true }).promise().then(d => d.Parameter.Value);
 
-    for (const c of config) {
-        console.log("PARSE:", c.type);
-        const id   = (yield ssm.getParameter({ Name: c.user_id,  WithDecryption: true }).promise() ).Parameter.Value;
-        const pass = (yield ssm.getParameter({ Name: c.password, WithDecryption: true }).promise() ).Parameter.Value;
-
-        const parser = c.type === "etc" ? new EtcMeisaiParser(id,pass) : new ViewCardParser(id,pass);
-        const ret = yield parser.parse().catch(err => { console.log("Error on loop:", err); return [] });
-        //console.log(" ==> ", c.type, JSON.stringify(ret))
-        yield s3.putObject({ Bucket: 'billing-notifier', Key: "result/" + c.type + ".txt", Body: JSON.stringify(ret) }).promise();
+            const parser = c.type === "etc" ? new EtcMeisaiParser(id,pass) : new ViewCardParser(id,pass);
+            const ret = await parser.parse().catch(err => { console.log("Error on loop:", err); return [] });
+            //console.log(" ==> ", c.type, JSON.stringify(ret))
+            await s3.putObject({ Bucket: 'billing-notifier', Key: "result/" + c.type + ".txt", Body: JSON.stringify(ret) }).promise();
+        }
+    } catch (e) {
+        console.log("Error on global:", e);
     }
-
-}).catch(err => { console.log("Error on global:", err) })
+})();
