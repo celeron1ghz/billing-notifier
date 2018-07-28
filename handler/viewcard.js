@@ -11,7 +11,7 @@ const S3_HISTORY_PATH = `viewcard/${now.getFullYear()}${ ("0"+(now.getMonth() + 
 
 function get_old_history()  {
     return (async () => {
-        console.log(`S3.getObject(${BUCKET}#${S3_HISTORY_PATH})`);
+        //console.log(`S3.getObject(${BUCKET}#${S3_HISTORY_PATH})`);
 
         const old_history = await s3.getObject({ Bucket: BUCKET, Key: S3_HISTORY_PATH }).promise()
             .then(data => JSON.parse(data.Body.toString()) )
@@ -25,7 +25,7 @@ function get_old_history()  {
 
 function get_new_history()  {
     return (async () => {
-        console.log(`S3.getObject(${BUCKET}#${CODEBUILD_ARTIFACT_PATH})`);
+        //console.log(`S3.getObject(${BUCKET}#${CODEBUILD_ARTIFACT_PATH})`);
         const cb_result   = await s3.getObject({ Bucket: BUCKET, Key: CODEBUILD_ARTIFACT_PATH }).promise();
         const new_history = JSON.parse(cb_result.Body.toString());
         return new_history;

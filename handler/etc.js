@@ -11,7 +11,7 @@ module.exports = async (event, context, callback) => {
         const filename = `etc/${now.getFullYear()}${ ("0"+(now.getMonth() + 1)).slice(-2) }.json`;
 
         // getting etc history from s3
-        console.log(`S3.getObject(${BUCKET}#${filename})`);
+        //console.log(`S3.getObject(${BUCKET}#${filename})`);
         const old_history = await s3.getObject({ Bucket: BUCKET, Key: filename }).promise()
             .then(data => {
                 const ret = JSON.parse(data.Body.toString());
@@ -24,7 +24,7 @@ module.exports = async (event, context, callback) => {
             });
 
         const path   = "result/etc.txt";
-        console.log(`S3.getObject(${BUCKET}#${path})`);
+        //console.log(`S3.getObject(${BUCKET}#${path})`);
 
         const cb_result = await s3.getObject({ Bucket: BUCKET, Key: path }).promise();
 
