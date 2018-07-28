@@ -1,6 +1,5 @@
 'use strict';
 
-const vo  = require('vo');
 const aws = require('aws-sdk');
 const s3  = new aws.S3({ signatureVersion: "v4" });
 const ssm = new aws.SSM();
@@ -11,32 +10,32 @@ const CODEBUILD_ARTIFACT_PATH = "result/viewcard.txt";
 const S3_HISTORY_PATH = `viewcard/${now.getFullYear()}${ ("0"+(now.getMonth() + 1)).slice(-2) }.json`;
 
 function get_old_history()  {
-    return vo(function*(){
+    return (async () => {
         console.log(`S3.getObject(${BUCKET}#${S3_HISTORY_PATH})`);
 
-        const old_history = yield s3.getObject({ Bucket: BUCKET, Key: S3_HISTORY_PATH }).promise()
+        const old_history = await s3.getObject({ Bucket: BUCKET, Key: S3_HISTORY_PATH }).promise()
             .then(data => JSON.parse(data.Body.toString()) )
             .catch(err => { console.log("old_history=none. reason: " + err); return [] });
 
         console.log(`old_history=${old_history.length}`);
 
         return old_history;
-    });
+    })();
 }
 
 function get_new_history()  {
-    return vo(function*(){
+    return (async () => {
         console.log(`S3.getObject(${BUCKET}#${CODEBUILD_ARTIFACT_PATH})`);
-        const cb_result   = yield s3.getObject({ Bucket: BUCKET, Key: CODEBUILD_ARTIFACT_PATH }).promise();
+        const cb_result   = await s3.getObject({ Bucket: BUCKET, Key: CODEBUILD_ARTIFACT_PATH }).promise();
         const new_history = JSON.parse(cb_result.Body.toString());
         return new_history;
-    });
+    })();
 }
 
-module.exports = (event, context, callback) => {
-    vo(function*(){
+module.exports = async (event, context, callback) => {
+    try {
         // fetch old history
-        const old_history = yield get_old_history();
+        const old_history = await get_old_history();
         const old_idx = {};
         old_history.forEach(h => {
             const key = `${h.date} ${h.shop} ${h.price}`;
@@ -45,7 +44,7 @@ module.exports = (event, context, callback) => {
         });
 
         // fetch new history
-        const new_history = yield get_new_history();
+        const new_history = await get_new_history();
         const month_total = {};
         new_history.forEach(h => {
             const mon = h.date.split('/').splice(0,2).join('/');
@@ -83,9 +82,9 @@ module.exports = (event, context, callback) => {
                     text:  `¥${month_total[key]}-`,
                 });
 
-                const hook_url = (yield ssm.getParameter({ Name: '/slack/webhook/sensitive', WithDecryption: true }).promise() ).Parameter.Value;
+                const hook_url = await ssm.getParameter({ Name: '/slack/webhook/sensitive', WithDecryption: true }).promise().then(d => d.Parameter.Value);
 
-                yield new Promise((resolve,reject) => {
+                await new Promise((resolve,reject) => {
                     const Slack   = require('slack-node');
                     const slack   = new Slack();
                     slack.setWebhook(hook_url);
@@ -101,14 +100,13 @@ module.exports = (event, context, callback) => {
             }
         }
 
-        const save = yield s3.putObject({ Bucket: BUCKET, Key: S3_HISTORY_PATH, Body: JSON.stringify(new_history) }).promise();
+        const save = await s3.putObject({ Bucket: BUCKET, Key: S3_HISTORY_PATH, Body: JSON.stringify(new_history) }).promise();
         callback(null, {
             old:    old_history.length,
             new:    new_history.length,
             notify: notify_history.length,
         });
-    })
-    .catch(err => {
+    } catch(err) {
         console.log(err);
-    });
+    }
 };

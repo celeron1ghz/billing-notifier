@@ -9,7 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "slack-node": "^0.1.8",
-    "vo": "^4.0.2"
+    "slack-node": "^0.1.8"
   }
 }
