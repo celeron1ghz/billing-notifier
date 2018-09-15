@@ -1,5 +1,6 @@
 'use strict';
 
+const moji = require('moji');
 const aws = require('aws-sdk');
 const s3  = new aws.S3({ signatureVersion: "v4" });
 const ssm = new aws.SSM();
@@ -11,8 +12,6 @@ const S3_HISTORY_PATH = `viewcard/${now.getFullYear()}${ ("0"+(now.getMonth() + 
 
 function get_old_history()  {
     return (async () => {
-        //console.log(`S3.getObject(${BUCKET}#${S3_HISTORY_PATH})`);
-
         const old_history = await s3.getObject({ Bucket: BUCKET, Key: S3_HISTORY_PATH }).promise()
             .then(data => JSON.parse(data.Body.toString()) )
             .catch(err => { console.log("old_history=none. reason: " + err); return [] });
@@ -25,7 +24,6 @@ function get_old_history()  {
 
 function get_new_history()  {
     return (async () => {
-        //console.log(`S3.getObject(${BUCKET}#${CODEBUILD_ARTIFACT_PATH})`);
         const cb_result   = await s3.getObject({ Bucket: BUCKET, Key: CODEBUILD_ARTIFACT_PATH }).promise();
         const new_history = JSON.parse(cb_result.Body.toString());
         return new_history;
@@ -63,12 +61,16 @@ module.exports = async (event, context, callback) => {
             const mon = h.month;
 
             if (genred[mon] == null) genred[mon] = [];
-            genred[mon].push({
-                title: `${h.date} ${h.shop}`,
-                text:  `\`¥${h.price}-\``,
-                color: 'good',
-                mrkdwn_in: ['text'],
-            });
+
+            genred[mon].push(
+              "*" + h.date.split('/').splice(1).join('/')
+                +  "* `¥" + h.price + "-` "
+                + moji(h.shop)
+                    .convert("ZE", "HE")
+                    .convert("ZS", "HS")
+                    .convert("ZK", "HK")
+                    .toString(),
+            );
         });
 
         if (new_history.length > 0) {
@@ -77,10 +79,9 @@ module.exports = async (event, context, callback) => {
             for (const key of keys) {
                 const attaches = genred[key];
 
-                attaches.push({
-                    title: `${key} total price`,
-                    text:  `¥${month_total[key]}-`,
-                });
+                attaches.push(
+                  "\n*" + key + " Total Price* : `¥" + month_total[key] + "-`",
+                );
 
                 const hook_url = await ssm.getParameter({ Name: '/slack/webhook/sensitive', WithDecryption: true }).promise().then(d => d.Parameter.Value);
 
@@ -92,7 +93,7 @@ module.exports = async (event, context, callback) => {
                         username:    `VIEW Card Billing (${key})`,
                         icon_emoji:  ':viewcard:',
                         mrkdwn:      true,
-                        attachments: attaches,
+                        text       : attaches.join("\n"),
                     }, (err,res) => {
                         if (err) { reject(err) } else { resolve(res) }
                     })
