@@ -24,11 +24,10 @@ module.exports = async (event, context, callback) => {
             });
 
         const path   = "result/etc.txt";
-        //console.log(`S3.getObject(${BUCKET}#${path})`);
-
         const cb_result = await s3.getObject({ Bucket: BUCKET, Key: path }).promise();
+        const data = JSON.parse(cb_result.Body.toString());
+        const new_history = data.meisai;
 
-        const new_history    = JSON.parse(cb_result.Body.toString());
         const notify_history = new_history.slice(old_history.length, new_history.length + 1);
         console.log(`new_history=${new_history.length}, notify_history=${notify_history.length}`);
 

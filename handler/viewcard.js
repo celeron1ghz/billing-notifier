@@ -43,7 +43,8 @@ module.exports = async (event, context, callback) => {
 
     // fetch new history
     let total = 0;
-    const new_history = await get_new_history();
+    const data = await get_new_history();
+    const new_history = data.meisai;
     const monthTotalAll = {};
     new_history.forEach(h => {
       const month = h.date.split('/').splice(0,2).join('/');

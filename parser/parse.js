@@ -27,9 +27,9 @@ const config = [
             const pass = await ssm.getParameter({ Name: c.password, WithDecryption: true }).promise().then(d => d.Parameter.Value);
 
             const parser = c.type === "etc" ? new EtcMeisaiParser(id,pass) : new ViewCardParser(id,pass);
-            const ret = await parser.parse().catch(err => { console.log("Error on loop:", err); return [] });
-            //console.log(" ==> ", c.type, JSON.stringify(ret))
-            await s3.putObject({ Bucket: 'billing-notifier', Key: "result/" + c.type + ".txt", Body: JSON.stringify(ret) }).promise();
+            const meisai = await parser.parse().catch(err => { console.log("Error on loop:", err); return [] });
+            const data = { meisai };
+            await s3.putObject({ Bucket: 'billing-notifier', Key: "result/" + c.type + ".txt", Body: JSON.stringify(data) }).promise();
         }
     } catch (e) {
         console.log("Error on global:", e);
