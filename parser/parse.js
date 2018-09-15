@@ -28,7 +28,10 @@ const config = [
 
             const parser = c.type === "etc" ? new EtcMeisaiParser(id,pass) : new ViewCardParser(id,pass);
             const meisai = await parser.parse().catch(err => { console.log("Error on loop:", err); return [] });
-            const data = { meisai };
+            const misc = await parser.afterParse().catch(err => { console.log("Error on loop:", err); return [] });
+            await parser.end();
+
+            const data = { meisai, misc };
             await s3.putObject({ Bucket: 'billing-notifier', Key: "result/" + c.type + ".txt", Body: JSON.stringify(data) }).promise();
         }
     } catch (e) {

@@ -51,6 +51,33 @@ class ViewCardParser extends PageParser {
         .wait("div#DivDetailInfo")
         .wait(1000);
     }
+
+    afterParse() {
+      return (async () => {
+        this.nightmare
+          .click("#vucGlobalNavi_LnkV0500_001Header")
+          .wait(1000)
+          .click("#BtnShow")
+          .wait(1000);
+
+        const html = await this.nightmare.evaluate(() => document.body.innerHTML);
+        const { JSDOM } = require('jsdom');
+        const { document } = new JSDOM(html).window;
+
+        var ret = [].slice.apply(document.querySelectorAll("#PnlShowControl tbody tr:nth-child(3) td"));
+        const row = ret.map(e => e.textContent)
+            .map(v => v.replace(/,/g, ""))
+            .map(v => parseInt(v));
+
+        const result = {
+            remain: row[0],
+            limit: row[1],
+            using: row[2],
+        };
+
+        console.log(result);
+      })();
+    }
 }
 
 module.exports = ViewCardParser;

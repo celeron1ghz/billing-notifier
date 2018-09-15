@@ -13,6 +13,12 @@ class PageParser {
     has_next_page(document)     { throw new Error("abstract method") }
     goto_next_page(nightmare)   { throw new Error("abstract method") }
 
+    afterParse() {
+      return (async () => {
+        console.log("you may override this method");
+      })();
+    }
+
     parse() {
       this.nightmare = new require('nightmare')({ show: true });
       const { JSDOM } = require('jsdom');
@@ -48,8 +54,13 @@ class PageParser {
           self.goto_next_page(this.nightmare)
         }
 
-        await this.nightmare.end();
         return result;
+      })();
+    }
+
+    end() {
+      return (async () => {
+        await this.nightmare.end();
       })();
     }
 }

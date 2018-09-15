@@ -57,6 +57,12 @@ class EtcMeisaiParser extends PageParser {
         .wait("table.meisaiinfo")
         .wait(1000);
     }
+
+    afterParse() {
+      return (async () => {
+        console.log("nothing");
+      })();
+    }
 }
 
 module.exports = EtcMeisaiParser;
