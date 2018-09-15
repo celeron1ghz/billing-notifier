@@ -43,7 +43,7 @@ class PageParser {
             break;
           }
 
-          console.log(" => NEXT")
+          //console.log(" => NEXT")
           self.goto_next_page(nightmare)
         }
 

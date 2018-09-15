@@ -36,39 +36,37 @@ module.exports = async (event, context, callback) => {
         // post to slack
         const ret = notify_history.map(h => {
             if (!h.from_place)  {
-                //return `[料金所] ${h.to_place}(${h.to_date} ${h.to_time}) ¥${h.price}`;
-                return {
-                    title:     `[料金所] ${h.to_place}`,
-                    text:      `${h.to_date} ${h.to_time}\n\`¥${h.price}-\``,
-                    color:     'good',
-                    mrkdwn_in: ['text'],
-                };
+              //return `[料金所] ${h.to_place}(${h.to_date} ${h.to_time}) ¥${h.price}`;
+              //title: `[料金所] ${h.to_place}`,
+              //text:  `${h.to_date} ${h.to_time}\n\`¥${h.price}-\``,
+              return [
+                h.to_place + ": `¥$" + h.price + "-`",
+                h.to_date + " " + h.to_time,
+              ].join("\n");
             }
             if (!h.from_date)   {
-                //return `[首都高速] ${h.from_place} -> ${h.to_place}(${h.to_date} ${h.to_time}) ¥${h.price}`;
-                return {
-                    title:     `[首都高速] ${h.from_place} -> ${h.to_place}`,
-                    text:      `${h.to_date} ${h.to_time}\n\`¥${h.price}-\``,
-                    color:     'good',
-                    mrkdwn_in: ['text'],
-                };
+              //return `[首都高速] ${h.from_place} -> ${h.to_place}(${h.to_date} ${h.to_time}) ¥${h.price}`;
+              //title: `[首都高速] ${h.from_place} -> ${h.to_place}`,
+              //text:  `${h.to_date} ${h.to_time}\n\`¥${h.price}-\``,
+              return [
+                h.from_place + " -> " + h.to_place + ": `¥$" + h.price + "-`",
+                h.to_date + " " + h.to_time,
+              ].join("\n");
             }
 
             //return `[高速自動車国道] ${h.from_place}(${h.from_date} ${h.from_time}) -> ${h.to_place}(${h.to_date} ${h.to_time}) ¥${h.price}`;
-            return {
-                title:     `[高速自動車国道] ${h.from_place} -> ${h.to_place}`,
-                text:      `${h.from_date} ${h.from_time} -> ${h.to_date} ${h.to_time}\n\`¥${h.price}-\``,
-                color:     'good',
-                mrkdwn_in: ['text'],
-            };
-
+            //title: `[高速自動車国道] ${h.from_place} -> ${h.to_place}`,
+            //text:  `${h.from_date} ${h.from_time} -> ${h.to_date} ${h.to_time}\n\`¥${h.price}-\``,
+            return [
+              h.from_place + " -> " + h.to_place + ": `¥$" + h.price + "-`",
+              `${h.from_date} ${h.from_time} -> ${h.to_date} ${h.to_time}`,
+            ].join("\n");
         });
 
         if (ret.length > 0) {
-            ret.push({
-                title: "Total price in this month",
-                text:  '¥' + new_history.reduce((a,b) => a + parseInt(b.price), 0) + '-',
-            });
+            ret.push(
+              "Total price in this month: `¥" + new_history.reduce((a,b) => a + parseInt(b.price), 0) + "-`",
+            );
         }
 
         const hook_url = await ssm.getParameter({ Name: '/slack/webhook/sensitive', WithDecryption: true }).promise().then(d => d.Parameter.Value);
@@ -81,7 +79,7 @@ module.exports = async (event, context, callback) => {
                 username:    'ETC Billing',
                 icon_emoji:  ':etc:',
                 mrkdwn:      true,
-                attachments: ret,
+                text:        ret.join("\n"),
             }, (err,res) => {
                 if (err) { reject(err) } else { resolve(res) }
             })
