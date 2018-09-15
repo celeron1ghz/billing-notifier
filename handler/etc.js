@@ -37,35 +37,29 @@ module.exports = async (event, context, callback) => {
         const ret = notify_history.map(h => {
             if (!h.from_place)  {
               //return `[料金所] ${h.to_place}(${h.to_date} ${h.to_time}) ¥${h.price}`;
-              //title: `[料金所] ${h.to_place}`,
-              //text:  `${h.to_date} ${h.to_time}\n\`¥${h.price}-\``,
               return [
-                h.to_place + ": `¥$" + h.price + "-`",
-                h.to_date + " " + h.to_time,
+                "`¥" + h.price + "-` : *" + h.to_place + "*",
+                "  (" + h.to_date + " " + h.to_time + ")",
               ].join("\n");
             }
             if (!h.from_date)   {
               //return `[首都高速] ${h.from_place} -> ${h.to_place}(${h.to_date} ${h.to_time}) ¥${h.price}`;
-              //title: `[首都高速] ${h.from_place} -> ${h.to_place}`,
-              //text:  `${h.to_date} ${h.to_time}\n\`¥${h.price}-\``,
               return [
-                h.from_place + " -> " + h.to_place + ": `¥$" + h.price + "-`",
-                h.to_date + " " + h.to_time,
+                "`¥" + h.price + "-` : *" + h.from_place + "→" + h.to_place + "*" ,
+                "  (" + h.to_date + " " + h.to_time + ")",
               ].join("\n");
             }
 
             //return `[高速自動車国道] ${h.from_place}(${h.from_date} ${h.from_time}) -> ${h.to_place}(${h.to_date} ${h.to_time}) ¥${h.price}`;
-            //title: `[高速自動車国道] ${h.from_place} -> ${h.to_place}`,
-            //text:  `${h.from_date} ${h.from_time} -> ${h.to_date} ${h.to_time}\n\`¥${h.price}-\``,
             return [
-              h.from_place + " -> " + h.to_place + ": `¥$" + h.price + "-`",
-              `${h.from_date} ${h.from_time} -> ${h.to_date} ${h.to_time}`,
+              "`¥" + h.price + "-` : *" + h.from_place + "→" + h.to_place + "*" ,
+              `  (${h.from_date} ${h.from_time} → ${h.to_time})`,
             ].join("\n");
         });
 
         if (ret.length > 0) {
             ret.push(
-              "Total price in this month: `¥" + new_history.reduce((a,b) => a + parseInt(b.price), 0) + "-`",
+              "\n*Total Price*: `¥" + new_history.reduce((a,b) => a + parseInt(b.price), 0) + "-` :money_with_wings:",
             );
         }
 
