@@ -11,7 +11,6 @@ module.exports = async (event, context, callback) => {
         const filename = `etc/${now.getFullYear()}${ ("0"+(now.getMonth() + 1)).slice(-2) }.json`;
 
         // getting etc history from s3
-        //console.log(`S3.getObject(${BUCKET}#${filename})`);
         const old_history = await s3.getObject({ Bucket: BUCKET, Key: filename }).promise()
             .then(data => {
                 const ret = JSON.parse(data.Body.toString());
@@ -30,7 +29,6 @@ module.exports = async (event, context, callback) => {
 
         const notify_history = new_history.slice(old_history.length, new_history.length + 1);
         console.log(`new_history=${new_history.length}, notify_history=${notify_history.length}`);
-
 
         // post to slack
         const ret = notify_history.map(h => {
