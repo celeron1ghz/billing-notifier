@@ -75,7 +75,7 @@ class ViewCardParser extends PageParser {
             using: row[2],
         };
 
-        console.log(result);
+        return result
       })();
     }
 }

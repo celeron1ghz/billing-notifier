@@ -22,6 +22,8 @@ module.exports = async (event, context, callback) => {
 
     const oldHistory = !!oldData ? oldData.meisai : [];
     const newHistory = !!newData ? newData.meisai : [];
+    const oldBalance = !!oldData ? oldData.meisai : [];
+    const newBalance = !!newData ? newData.meisai : [];
 
     let total = 0;
     const old_idx = {};
