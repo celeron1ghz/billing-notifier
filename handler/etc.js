@@ -52,7 +52,7 @@ module.exports = async (event, context, callback) => {
 
         if (ret.length > 0) {
             ret.push(
-              "\n*Total Price*: `¥" + newHistory.new_history.reduce((a,b) => a + parseInt(b.price), 0) + "-` :money_with_wings:",
+              "\n*Total Price*: `¥" + newHistory.reduce((a,b) => a + parseInt(b.price), 0) + "-` :money_with_wings:",
             );
         }
 
