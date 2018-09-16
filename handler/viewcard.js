@@ -5,9 +5,9 @@ const aws = require('aws-sdk');
 const s3  = new aws.S3({ signatureVersion: "v4" });
 const ssm = new aws.SSM();
 
-const now = new Date();
 const BUCKET = "billing-notifier";
 const CODEBUILD_ARTIFACT_PATH = "result/viewcard.txt";
+const now = new Date();
 const S3_HISTORY_PATH = `viewcard/${now.getFullYear()}${ ("0"+(now.getMonth() + 1)).slice(-2) }.json`;
 
 module.exports = async (event, context, callback) => {
