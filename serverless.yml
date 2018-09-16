@@ -37,6 +37,8 @@ functions:
   etc:
     handler: handler.etc
     description: calc etc's diff
+    environment:
+      SLACK_WEBHOOK_URL: "${ssm:/slack/webhook/sensitive~true}"
   viewcard:
     handler: handler.viewcard
     description: calc viewcard's diff
