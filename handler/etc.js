@@ -28,27 +28,17 @@ module.exports = async (event, context, callback) => {
 
     // post to slack
     const ret = notifyHistory.map(h => {
-      if (!h.from_place)  {
-        //return `[料金所] ${h.to_place}(${h.to_date} ${h.to_time}) ¥${h.price}`;
-        return [
-          "`¥" + h.price + "-` : *" + h.to_place + "*",
-          "  (" + h.to_date + " " + h.to_time + ")",
-        ].join("\n");
-      }
+      const date = h.to_date.split('/').splice(1).join('/');
 
-      if (!h.from_date)   {
-        //return `[首都高速] ${h.from_place} -> ${h.to_place}(${h.to_date} ${h.to_time}) ¥${h.price}`;
-        return [
-          "`¥" + h.price + "-` : *" + h.from_place + "→" + h.to_place + "*" ,
-          "  (" + h.to_date + " " + h.to_time + ")",
-        ].join("\n");
-      }
+      const place = !!h.from_place && !!h.to_place
+        ? h.from_place + "→" + h.to_place
+        : h.to_place;
 
-      //return `[高速自動車国道] ${h.from_place}(${h.from_date} ${h.from_time}) -> ${h.to_place}(${h.to_date} ${h.to_time}) ¥${h.price}`;
-      return [
-        "`¥" + h.price + "-` : *" + h.from_place + "→" + h.to_place + "*" ,
-        `  (${h.from_date} ${h.from_time} → ${h.to_time})`,
-      ].join("\n");
+      const time = h.from_time === h.to_time
+        ? h.to_time
+        : h.from_time + "→" + h.to_time;
+
+      return "*" + date + "* `¥" + h.price + "-` " + place + " (" + time + ")";
     });
 
     if (ret.length > 0) {
