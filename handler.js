@@ -33,7 +33,11 @@ module.exports.main = async (event, context) => {
     await etc.init();
 
     process.env.HOME = "/opt/";
-    await etc.parse();
+    const newData = await etc.parse();
+    const oldData = await etc.getMostRecentMeisai();
+
+    console.log(newData);
+    console.log(oldData);
 
   } catch(e) {
     console.log("Error happen:", e);

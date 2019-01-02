@@ -9,7 +9,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.382.0",
     "moji": "^0.5.1",
+    "puppeteer": "^1.11.0",
     "slack-node": "^0.1.8"
   }
 }

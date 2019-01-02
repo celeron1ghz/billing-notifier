@@ -5,6 +5,7 @@ class EtcMeisaiParser extends PageParser {
     await super.init();
     this.id = await this.ssm.getParameter({ Name: '/webservice/etc_meisai/user_id',  WithDecryption: true }).promise().then(d => d.Parameter.Value);
     this.password = await this.ssm.getParameter({ Name: '/webservice/etc_meisai/password', WithDecryption: true }).promise().then(d => d.Parameter.Value);
+    this.name = 'etc';
   }
 
   async login() {

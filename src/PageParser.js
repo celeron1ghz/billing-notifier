@@ -10,8 +10,12 @@ class PageParser {
     this.aws = aws;
     this.s3  = new aws.S3();
     this.ssm = new aws.SSM();
-    this.name = this.constructor.name;
+    this.bucket = 'billing-notifier';
   }
+
+  login()           { throw Error("abstract method: login") }
+  parse_page()      { throw Error("abstract method: parse_page") }
+  goto_next_page()  { throw Error("abstract method: goto_next_page") }
 
   async init() {
     const puppeteer = require('puppeteer');
@@ -24,10 +28,6 @@ class PageParser {
 
     this.page = await this.puppeteer.newPage();
   }
-
-  login()           { throw Error("abstract method: login") }
-  parse_page()      { throw Error("abstract method: parse_page") }
-  goto_next_page()  { throw Error("abstract method: goto_next_page") }
 
   async parse() {
     await this.login();
@@ -43,14 +43,32 @@ class PageParser {
         break;
       }
     }
+
+    return meisais;
   }
 
   async screenshot() {
     //const image = await page.screenshot();
     const image = await this.page.screenshot({ clip: { x: 0, y: 0, width: 1024, height: 800 } });
-    const filename = this.name + "-" + new Date().getTime() + '.png';
+    const filename = 'ss/' + this.name + "-" + new Date().getTime() + '.png';
     console.log("screenshot:", filename);
-    return this.s3.putObject({ Bucket: 'puppeteer-test2', Key: filename, Body: image }).promise();
+    return this.s3.putObject({ Bucket: this.bucket, Key: filename, Body: image }).promise();
+  }
+
+  async storeMostRecentMeisai(data) {
+    const now = new Date();
+    const storeFile = `${this.name}/${now.getFullYear()}${ ("0"+(now.getMonth() + 1)).slice(-2) }.json`;
+
+    return await s3.putObject({ Bucket: this.bucket, Key: storeFile, Body: JSON.stringify(data) }).promise();
+  }
+
+  async getMostRecentMeisai() {
+    const now = new Date();
+    const storeFile = `${this.name}/${now.getFullYear()}${ ("0"+(now.getMonth() + 1)).slice(-2) }.json`;
+
+    return await this.s3.getObject({ Bucket: this.bucket, Key: storeFile }).promise()
+      .then(data => JSON.parse(data.Body.toString()))
+      .catch(err => { console.log("Error on old_history. reason: " + err); return null });
   }
 }
 
