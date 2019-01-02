@@ -22,8 +22,8 @@ module.exports = async (event, context, callback) => {
 
     const oldHistory = !!oldData ? oldData.meisai : [];
     const newHistory = !!newData ? newData.meisai : [];
-    const oldBalance = !!oldData ? oldData.meisai : [];
-    const newBalance = !!newData ? newData.meisai : [];
+    const oldBalance = !!oldData ? oldData.misc : [];
+    const newBalance = !!newData ? newData.misc : [];
 
     let total = 0;
     const old_idx = {};
@@ -66,7 +66,7 @@ module.exports = async (event, context, callback) => {
       );
     });
 
-    if (newHistory.length > 0) {
+    if (formatted.length > 0) {
       formatted.push("\n"); // separator
 
       for (const key of Object.keys(monthTotalDiff))    {
@@ -87,6 +87,13 @@ module.exports = async (event, context, callback) => {
         "",
         "*Total Price* : `¥" + total + "-`",
       );
+
+      if (oldBalance.remain !== newBalance.remain)  {
+        formatted.push(
+          "",
+          "*Balance* : remain=`¥" + newBalance.remain + "-`, using=`¥" + newBalance.using + "-`",
+        );
+      }
 
       await new Promise((resolve,reject) => {
         const Slack   = require('slack-node');
