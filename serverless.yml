@@ -24,6 +24,11 @@ package:
     - parser/**
 
 functions:
+  main:
+    handler: handler.main
+    description: main
+    memorySize: 3008
+    timeout: 300
   kicker:
     handler: handler.kicker
     description: invoke codebuild

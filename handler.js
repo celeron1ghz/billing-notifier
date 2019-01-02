@@ -1,7 +1,8 @@
 'use strict';
 
 const aws = require('aws-sdk');
-const cb  = new aws.CodeBuild();
+const cb = new aws.CodeBuild();
+const EtcMeisaiParser = require('./src/EtcMeisaiPageParser');
 
 module.exports.kicker = (event, context, callback) => {
     cb.startBuild({ projectName: 'billing-notifier' }, function(err, ret){
@@ -25,3 +26,18 @@ module.exports.status_getter = (event, context, callback) => {
 
 module.exports.etc      = require('./handler/etc.js');
 module.exports.viewcard = require('./handler/viewcard.js');
+
+module.exports.main = async (event, context) => {
+  try {
+    const etc = new EtcMeisaiParser();
+    await etc.init();
+
+    process.env.HOME = "/opt/";
+    await etc.parse();
+
+  } catch(e) {
+    console.log("Error happen:", e);
+  }
+
+  return { message: 'OK' };
+};
