@@ -45,6 +45,7 @@ module.exports.main = async (event, context) => {
       const newData = await site.parse();
       const oldData = await site.getMostRecentMeisai();
       await site.compareMeisai(oldData, newData);
+      await site.storeMostRecentMeisai({ meisai: newData });
     }
 
   } catch(e) {

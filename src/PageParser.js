@@ -80,7 +80,7 @@ class PageParser {
     const now = new Date();
     const storeFile = `${this.name}/${now.getFullYear()}${ ("0"+(now.getMonth() + 1)).slice(-2) }.json`;
 
-    return await s3.putObject({ Bucket: this.bucket, Key: storeFile, Body: JSON.stringify(data) }).promise();
+    return await this.s3.putObject({ Bucket: this.bucket, Key: storeFile, Body: JSON.stringify(data) }).promise();
   }
 
   async getMostRecentMeisai() {

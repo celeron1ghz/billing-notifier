@@ -126,9 +126,11 @@ class ViewCardMeisaiParser extends PageParser {
 
       formatted.push(
         "",
-        `*All*: ${newHistory.length}`,
-        `*Show*: ${notifyHistory.length}`,
-        "*Total Price* : `¥" + total + "-`",
+        [
+          `*All*: ${newHistory.length}`,
+          `*Show*: ${notifyHistory.length}`,
+          "*Total*: `¥" + total + "-` :money_with_wings:",
+        ].join(", "),
       );
 
       //if (oldBalance.remain !== newBalance.remain)  {

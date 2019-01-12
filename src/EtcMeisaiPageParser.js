@@ -90,7 +90,7 @@ class EtcMeisaiParser extends PageParser {
         "",
         [
           `*All*: ${newHistory.length}`,
-          `*show*: ${ret.length}`,
+          `*Show*: ${ret.length}`,
           "*Total*: `¥" + newHistory.reduce((a,b) => a + parseInt(b.price), 0) + "-` :money_with_wings:",
         ].join(", "),
       );
