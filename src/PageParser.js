@@ -27,6 +27,7 @@ class PageParser {
   login()           { throw Error("abstract method: login") }
   parse_page()      { throw Error("abstract method: parse_page") }
   goto_next_page()  { throw Error("abstract method: goto_next_page") }
+  compareMeisai()  { throw Error("abstract method: compareMeisai") }
 
   async init() {
     const { aws, browser } = await getPuppeteer();
@@ -46,10 +47,10 @@ class PageParser {
 
     while (true) {
       const ret = await this.parse_page();
-      await this.screenshot();
+      //await this.screenshot();
 
       meisais.push(...ret);
-      console.log(meisais.length);
+      //console.log("GOT:", meisais.length);
       if (!await this.goto_next_page()) {
         break;
       }

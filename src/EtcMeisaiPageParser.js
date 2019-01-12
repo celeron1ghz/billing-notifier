@@ -18,14 +18,17 @@ class EtcMeisaiParser extends PageParser {
     await this.page.waitForNavigation({ waitUntil: 'domcontentloaded' });
 
     // previous month
-    const monthes = await this.page.$$(".meisaiinfo:last-child button.mlink_no");
-    monthes[monthes.length - 2].click();
-    await this.page.waitForNavigation({ waitUntil: 'domcontentloaded' });
+    //const monthes = await this.page.$$(".meisaiinfo:last-child button.mlink_no");
+    //monthes[monthes.length - 2].click();
+    //await this.page.waitForNavigation({ waitUntil: 'domcontentloaded' });
   }
 
   async parse_page() {
     return this.page.evaluate(() => {
-      return [...document.querySelectorAll("tr.meisai, tr.meisai_r")].map(tr => {
+      const trs = [...document.querySelectorAll("tr.meisai, tr.meisai_r")];
+      trs.shift();
+
+      return trs.map(tr => {
         const td1 = [...tr.querySelectorAll("td:nth-child(2) > table > tbody > tr > td > span")].map(function(span){ return span.innerHTML }); 
         const td2 = tr.querySelector("td:nth-child(3) span").innerHTML;
         const td4 = tr.querySelector("td:nth-child(5) span").innerHTML;
@@ -58,6 +61,37 @@ class EtcMeisaiParser extends PageParser {
     } catch(e) {
       return false;
     }
+  }
+
+  compareMeisai(oldData, newData) {
+    const oldHistory = !!oldData ? oldData.meisai : [];
+    const newHistory = !!newData ? newData: [];
+    const notifyHistory = newHistory.slice(oldHistory.length, newHistory.length + 1);
+
+    console.log(`old=${oldHistory.length}, new=${newHistory.length}, notify=${notifyHistory.length}`);
+
+    // post to slack
+    const ret = notifyHistory.map(h => {
+      const date = h.to_date.split('/').splice(1).join('/');
+
+      const place = !!h.from_place && !!h.to_place
+        ? h.from_place + "→" + h.to_place
+        : h.to_place;
+
+      const time = h.from_time === h.to_time
+        ? h.to_time
+        : h.from_time + "→" + h.to_time;
+
+      return "*" + date + "* `¥" + h.price + "-` " + place + " (" + time + ")";
+    });
+
+    if (ret.length > 0) {
+      ret.push(
+        "\n*Total Price*: `¥" + newHistory.reduce((a,b) => a + parseInt(b.price), 0) + "-` :money_with_wings:",
+      );
+    }
+
+    console.log(ret);
   }
 }
 
