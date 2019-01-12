@@ -22,7 +22,7 @@ Set these value to `EC2 Parameter Store`.
 ## SETUP SERVERLESS SCRIPT
 ```
 git clone https://github.com/celeron1ghz/billing-notifier.git
-cd billing-notifier/lambda
+cd billing-notifier
 sls deploy
 ```
 

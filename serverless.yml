@@ -9,19 +9,11 @@ provider:
   variableSyntax: "\\${{([\\s\\S]+?)}}"
   iamRoleStatements:
     - Effect: Allow
-      Action: [codebuild:StartBuild, codebuild:BatchGetBuilds]
-      Resource:
-        Fn::Join: [":", [ "arn:aws:codebuild", { Ref: AWS::Region }, { Ref: AWS::AccountId }, "project/billing-notifier" ]]
-    - Effect: Allow
       Action: ["s3:List*", s3:GetObject]
       Resource: "arn:aws:s3:::${{self:service}}"
     - Effect: Allow
       Action: ["s3:Get*", s3:PutObject]
       Resource: "arn:aws:s3:::${{self:service}}/*"
-
-package:
-  exclude:
-    - parser/**
 
 functions:
   main:
@@ -31,22 +23,9 @@ functions:
     timeout: 300
     environment:
       SLACK_WEBHOOK_URL: "${{ssm:/slack/webhook/sensitive~true}}"
-  kicker:
-    handler: handler.kicker
-    description: invoke codebuild
-  checker:
-    handler: handler.status_getter
-    description: status check codebuild project
-  etc:
-    handler: handler.etc
-    description: calc etc's diff
-    environment:
-      SLACK_WEBHOOK_URL: "${{ssm:/slack/webhook/sensitive~true}}"
-  viewcard:
-    handler: handler.viewcard
-    description: calc viewcard's diff
-    environment:
-      SLACK_WEBHOOK_URL: "${{ssm:/slack/webhook/sensitive~true}}"
+    layers:
+      - Fn::Join: [ ":", [ "arn:aws:lambda", { Ref: AWS::Region }, { Ref: AWS::AccountId }, "layer:puppeteer:3" ] ]
+      - Fn::Join: [ ":", [ "arn:aws:lambda", { Ref: AWS::Region }, { Ref: AWS::AccountId }, "layer:japanese_font:1" ] ]
 
 resources:
   Description: Parse credit card's billing site and post to slack
@@ -56,175 +35,11 @@ resources:
       Properties:
         RoleName: "${{self:service}}-exec"
 
-    KickerLogGroup:
+    MainLogGroup:
       Properties:
         RetentionInDays: 7
-
-    CheckerLogGroup:
-      Properties:
-        RetentionInDays: 7
-
-    EtcLogGroup:
-      Properties:
-        RetentionInDays: 7
-
-    ViewcardLogGroup:
-      Properties:
-        RetentionInDays: 7
-
-    IamRoleStateMachineExecution:
-      Type: AWS::IAM::Role
-      Properties:
-        RoleName: "${{self:service}}-state"
-        AssumeRolePolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-            - Effect: Allow
-              Principal: { Service: "states.ap-northeast-1.amazonaws.com" }
-              Action: sts:AssumeRole
-        Policies:
-          - PolicyName: "${{self:service}}-exec-policy"
-            PolicyDocument:
-              Version: "2012-10-17"
-              Statement:
-                - Effect: Allow
-                  Action:
-                    - lambda:InvokeFunction
-                  Resource:
-                    - { Fn::GetAtt: [KickerLambdaFunction, Arn] }
-                    - { Fn::GetAtt: [CheckerLambdaFunction, Arn] }
-                    - { Fn::GetAtt: [ViewcardLambdaFunction, Arn] }
-                    - { Fn::GetAtt: [EtcLambdaFunction, Arn] }
-
-    IamRoleCodeBuildExecution:
-      Type: AWS::IAM::Role
-      Properties:
-        RoleName: "${{self:service}}-codebuild"
-        AssumeRolePolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-            - Effect: Allow
-              Principal:
-                Service: codebuild.amazonaws.com
-              Action: sts:AssumeRole
-        Policies:
-          - PolicyName: "${{self:service}}-codebuild-policy"
-            PolicyDocument:
-              Version: "2012-10-17"
-              Statement:
-                - Effect: Allow
-                  Resource:
-                    - "arn:aws:s3:::${{self:service}}/*"
-                  Action:
-                    - s3:PutObject
-                - Effect: Allow
-                  Resource: "*"
-                  Action:
-                    - logs:CreateLogGroup
-                    - logs:CreateLogStream
-                    - logs:PutLogEvents
-                - Effect: Allow
-                  Action:
-                    - ssm:GetParameter
-                  Resource:
-                    - Fn::Join: [ ":", ["arn:aws:ssm", { Ref: AWS::Region }, { Ref: AWS::AccountId }, "parameter/webservice/viewcard/*"]]
-                    - Fn::Join: [ ":", ["arn:aws:ssm", { Ref: AWS::Region }, { Ref: AWS::AccountId }, "parameter/webservice/etc_meisai/*"]]
-
-    IamRoleCronExecution:
-      Type: AWS::IAM::Role
-      Properties:
-        RoleName: "${{self:service}}-events"
-        AssumeRolePolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-            - Effect: Allow
-              Principal: { Service: "events.amazonaws.com" }
-              Action: sts:AssumeRole
-        Policies:
-          - PolicyName: "${{self:service}}-events-policy"
-            PolicyDocument:
-              Version: "2012-10-17"
-              Statement:
-                - Effect: Allow
-                  Action:
-                    - states:StartExecution
-                  Resource:
-                    - { Ref: BillingSiteParser }
 
     ResultStoreBucket:
       Type: AWS::S3::Bucket
       Properties:
        BucketName: "${{self:service}}"
-
-    BillingSiteParser:
-      Type: AWS::StepFunctions::StateMachine
-      Properties:
-        RoleArn:
-          Fn::GetAtt: [ IamRoleStateMachineExecution, Arn ]
-        DefinitionString:
-          Fn::Sub: |-
-            {
-              "Comment": "Polling codebuild running",
-              "StartAt": "JobMain",
-              "States": {
-                "JobMain":    { "Type": "Task", "Resource": "${KickerLambdaFunction.Arn}",  "Next": "JobCheck" },
-                "JobCheck":   { "Type": "Task", "Resource": "${CheckerLambdaFunction.Arn}", "Next": "JobPoller" },
-                "JobPoller":  {
-                  "Type": "Choice",
-                  "Choices": [
-                    { "Variable": "$.buildStatus", "StringEquals": "SUCCEEDED",   "Next": "JobCalcDiff" },
-                    { "Variable": "$.buildStatus", "StringEquals": "IN_PROGRESS", "Next": "JobWait" }
-                  ]
-                },
-                "JobWait":    { "Type": "Wait", "Seconds": 30, "Next": "JobCheck" },
-                "JobCalcDiff": {
-                  "Type": "Parallel",
-                  "Branches": [
-                    {
-                      "StartAt": "ParseEtcSite",
-                      "States":{
-                        "ParseEtcSite": { "Type": "Task", "Resource": "${EtcLambdaFunction.Arn}", "End": true }
-                      }
-                    },{
-                      "StartAt": "ParseViewcardSite",
-                      "States":{
-                        "ParseViewcardSite": { "Type": "Task", "Resource": "${ViewcardLambdaFunction.Arn}", "End": true }
-                      }
-                    }
-                  ],
-                  "End": true
-                }
-              }
-            }
-
-    BillingSiteRunner:
-      Type: AWS::CodeBuild::Project
-      Properties:
-        Name: "${{self:service}}"
-        Description: Meisai site parser
-        Artifacts:
-          Type: NO_ARTIFACTS
-#          Location: billing-notifier
-#          Name: codebuild_result
-#          Packaging: NONE
-#          NamespaceType: NONE
-        Environment:
-          Type: LINUX_CONTAINER
-          Image: "celeron1ghz/nightmare"
-          ComputeType: BUILD_GENERAL1_SMALL
-        ServiceRole: { Ref: IamRoleCodeBuildExecution }
-        Source:
-          Type: GITHUB
-          Location: "https://github.com/celeron1ghz/billing-notifier.git"
-        TimeoutInMinutes: 10
-
-    Cron:
-      Type: AWS::Events::Rule
-      Properties:
-        Name: "${{self:service}}"
-        Description: Handling billing notify
-        ScheduleExpression: cron(0 14 * * ? *)
-        Targets:
-          - Id: "${{self:service}}-cron-state"
-            Arn: { Ref: BillingSiteParser }
-            RoleArn: { Fn::GetAtt: [IamRoleCronExecution, Arn] }

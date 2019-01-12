@@ -1,4 +1,4 @@
-const PageParser = require('./Pageparser')
+const PageParser = require('./PageParser')
 
 class EtcMeisaiParser extends PageParser {
   async init() {

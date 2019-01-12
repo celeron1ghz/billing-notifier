@@ -1,5 +1,5 @@
 const moji = require('moji');
-const PageParser = require('./Pageparser')
+const PageParser = require('./PageParser')
 
 class ViewCardMeisaiParser extends PageParser {
   async init() {
