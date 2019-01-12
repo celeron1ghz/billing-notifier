@@ -68,7 +68,7 @@ class EtcMeisaiParser extends PageParser {
     const newHistory = !!newData ? newData: [];
     const notifyHistory = newHistory.slice(oldHistory.length, newHistory.length + 1);
 
-    console.log(`old=${oldHistory.length}, new=${newHistory.length}, notify=${notifyHistory.length}`);
+    console.log(`etc: new=${newHistory.length}, notify=${notifyHistory.length}`);
 
     // format for slack
     const ret = notifyHistory.map(h => {

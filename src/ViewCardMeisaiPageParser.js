@@ -88,7 +88,7 @@ class ViewCardMeisaiParser extends PageParser {
     });
 
     const notifyHistory = newHistory.filter(h => { const key = `${h.date} ${h.shop} ${h.price}`; return !old_idx[key] });
-    console.log(`new=${newHistory.length}, notify=${notifyHistory.length}`);
+    console.log(`viewcard: new=${newHistory.length}, notify=${notifyHistory.length}`);
 
     notifyHistory.forEach(h => {
       const month = h.month;

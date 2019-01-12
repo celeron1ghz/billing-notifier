@@ -30,15 +30,22 @@ module.exports.viewcard = require('./handler/viewcard.js');
 
 module.exports.main = async (event, context) => {
   try {
-    const etc = new ViewCardMeisaiParser();
-    //const etc = new EtcMeisaiParser();
-    await etc.init();
+    const sites = [
+      new ViewCardMeisaiParser(),
+      new EtcMeisaiParser(),
+    ];
+
+    for (const site of sites)   {
+      await site.init();
+    }
 
     process.env.HOME = "/opt/";
 
-    const newData = await etc.parse();
-    const oldData = await etc.getMostRecentMeisai();
-    await etc.compareMeisai(oldData, newData);
+    for (const site of sites)   {
+      const newData = await site.parse();
+      const oldData = await site.getMostRecentMeisai();
+      await site.compareMeisai(oldData, newData);
+    }
 
   } catch(e) {
     console.log("Error happen:", e);
