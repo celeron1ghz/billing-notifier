@@ -3,6 +3,7 @@
 const aws = require('aws-sdk');
 const cb = new aws.CodeBuild();
 const EtcMeisaiParser = require('./src/EtcMeisaiPageParser');
+const ViewCardMeisaiParser = require('./src/ViewCardMeisaiPageParser');
 
 module.exports.kicker = (event, context, callback) => {
     cb.startBuild({ projectName: 'billing-notifier' }, function(err, ret){
@@ -29,15 +30,15 @@ module.exports.viewcard = require('./handler/viewcard.js');
 
 module.exports.main = async (event, context) => {
   try {
-    const etc = new EtcMeisaiParser();
+    const etc = new ViewCardMeisaiParser();
+    //const etc = new EtcMeisaiParser();
     await etc.init();
 
     process.env.HOME = "/opt/";
+
     const newData = await etc.parse();
     const oldData = await etc.getMostRecentMeisai();
-
-    console.log(newData);
-    console.log(oldData);
+    await etc.compareMeisai(oldData, newData);
 
   } catch(e) {
     console.log("Error happen:", e);

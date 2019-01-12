@@ -31,7 +31,8 @@ class ViewCardMeisaiParser extends PageParser {
   async parse_page() {
     return this.page.evaluate(() => {
       const trs = [...document.querySelectorAll("div#DivDetailInfo table tbody tr")];
-      //trs.shift();
+      trs.shift();
+      trs.shift();
 
       return trs.map(function(tr){
         const td1 = tr.querySelectorAll("td:nth-child(1)");
@@ -125,6 +126,8 @@ class ViewCardMeisaiParser extends PageParser {
 
       formatted.push(
         "",
+        `*All*: ${newHistory.length}`,
+        `*Show*: ${notifyHistory.length}`,
         "*Total Price* : `¥" + total + "-`",
       );
 

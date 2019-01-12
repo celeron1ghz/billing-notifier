@@ -53,7 +53,10 @@ class PageParser {
 
     while (true) {
       const ret = await this.parse_page();
-      //await this.screenshot();
+
+      if (process.env.SCREENSHOT)   {
+        await this.screenshot();
+      }
 
       meisais.push(...ret);
       //console.log("GOT:", meisais.length);
