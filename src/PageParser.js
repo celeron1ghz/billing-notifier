@@ -7,6 +7,10 @@ async function getPuppeteer() {
 
   let browser;
 
+  const Slack = require('slack-node');
+  const slack = new Slack();
+  slack.setWebhook(process.env.SLACK_WEBHOOK_URL);
+
   if (process.env.IS_LOCAL)   {
     aws.config.credentials = new aws.SharedIniFileCredentials({ profile: 'default' });
 
@@ -20,7 +24,7 @@ async function getPuppeteer() {
     browser = await puppeteer.launch(puppeteer_params);
   }
 
-  return { browser, aws };
+  return { browser, aws, slack };
 }
 
 class PageParser {
@@ -30,7 +34,7 @@ class PageParser {
   compareMeisai()  { throw Error("abstract method: compareMeisai") }
 
   async init() {
-    const { aws, browser } = await getPuppeteer();
+    const { aws, browser, slack } = await getPuppeteer();
 
     this.aws = aws;
     this.s3  = new aws.S3();
@@ -39,6 +43,8 @@ class PageParser {
 
     this.puppeteer = browser;
     this.page = await this.puppeteer.newPage();
+
+    this.slack = slack;
   }
 
   async parse() {
@@ -81,6 +87,14 @@ class PageParser {
     return await this.s3.getObject({ Bucket: this.bucket, Key: storeFile }).promise()
       .then(data => JSON.parse(data.Body.toString()))
       .catch(err => { console.log("Error on old_history. reason: " + err); return null });
+  }
+
+  async postToSlack(param)  {
+    return new Promise((resolve,reject) => {
+      this.slack.webhook(param, (err,res) => {
+        if (err) { reject(err) } else { resolve(res) }
+      });
+    });
   }
 }
 

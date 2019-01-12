@@ -70,7 +70,7 @@ class EtcMeisaiParser extends PageParser {
 
     console.log(`old=${oldHistory.length}, new=${newHistory.length}, notify=${notifyHistory.length}`);
 
-    // post to slack
+    // format for slack
     const ret = notifyHistory.map(h => {
       const date = h.to_date.split('/').splice(1).join('/');
 
@@ -91,7 +91,12 @@ class EtcMeisaiParser extends PageParser {
       );
     }
 
-    console.log(ret);
+    this.postToSlack({
+      username: 'ETC Billing',
+      icon_emoji: ':etc:',
+      mrkdwn: true,
+      text: ret.join("\n"),
+    });
   }
 }
 

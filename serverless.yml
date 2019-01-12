@@ -29,6 +29,8 @@ functions:
     description: main
     memorySize: 3008
     timeout: 300
+    environment:
+      SLACK_WEBHOOK_URL: "${{ssm:/slack/webhook/sensitive~true}}"
   kicker:
     handler: handler.kicker
     description: invoke codebuild
