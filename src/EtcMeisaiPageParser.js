@@ -87,16 +87,21 @@ class EtcMeisaiParser extends PageParser {
 
     if (ret.length > 0) {
       ret.push(
-        "\n*Total Price*: `¥" + newHistory.reduce((a,b) => a + parseInt(b.price), 0) + "-` :money_with_wings:",
+        "",
+        [
+          `*All*: ${newHistory.length}`,
+          `*show*: ${ret.length}`,
+          "*Total*: `¥" + newHistory.reduce((a,b) => a + parseInt(b.price), 0) + "-` :money_with_wings:",
+        ].join(", "),
       );
-    }
 
-    await this.postToSlack({
-      username: 'ETC Billing',
-      icon_emoji: ':etc:',
-      mrkdwn: true,
-      text: ret.join("\n"),
-    });
+      await this.postToSlack({
+        username: 'ETC Billing',
+        icon_emoji: ':etc:',
+        mrkdwn: true,
+        text: ret.join("\n"),
+      });
+    }
   }
 }
 
