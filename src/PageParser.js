@@ -1,31 +1,42 @@
-class PageParser {
-  constructor() {
-    const aws = require('aws-sdk');
+async function getPuppeteer() {
+  const aws = require('aws-sdk');
+  const puppeteer_params = {
+    headless: true,
+    args: ['--no-sandbox', '--disable-gpu', '--single-process'],
+  };
 
-    if (process.env.IS_LOCAL)   {   
-      //console.log("Running in local: loading credential from local ini");
-      aws.config.credentials = new aws.SharedIniFileCredentials({ profile: 'default' }); 
-    }
+  let browser;
 
-    this.aws = aws;
-    this.s3  = new aws.S3();
-    this.ssm = new aws.SSM();
-    this.bucket = 'billing-notifier';
+  if (process.env.IS_LOCAL)   {
+    aws.config.credentials = new aws.SharedIniFileCredentials({ profile: 'default' });
+
+    const puppeteer = require('puppeteer');
+    browser = await puppeteer.launch(puppeteer_params);
+
+  } else {
+    puppeteer_params.executablePath = '/opt/headless-chromium';
+
+    const puppeteer = require('puppeteer-core');
+    browser = await puppeteer.launch(puppeteer_params);
   }
 
+  return { browser, aws };
+}
+
+class PageParser {
   login()           { throw Error("abstract method: login") }
   parse_page()      { throw Error("abstract method: parse_page") }
   goto_next_page()  { throw Error("abstract method: goto_next_page") }
 
   async init() {
-    const puppeteer = require('puppeteer');
+    const { aws, browser } = await getPuppeteer();
 
-    this.puppeteer = await puppeteer.launch({
-      headless: true,
-      //executablePath: '/opt/headless-chromium',
-      args: ['--no-sandbox', '--disable-gpu', '--single-process'],
-    });
+    this.aws = aws;
+    this.s3  = new aws.S3();
+    this.ssm = new aws.SSM();
+    this.bucket = 'billing-notifier';
 
+    this.puppeteer = browser;
     this.page = await this.puppeteer.newPage();
   }
 
