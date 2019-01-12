@@ -63,7 +63,7 @@ class EtcMeisaiParser extends PageParser {
     }
   }
 
-  compareMeisai(oldData, newData) {
+  async compareMeisai(oldData, newData) {
     const oldHistory = !!oldData ? oldData.meisai : [];
     const newHistory = !!newData ? newData: [];
     const notifyHistory = newHistory.slice(oldHistory.length, newHistory.length + 1);
@@ -91,7 +91,7 @@ class EtcMeisaiParser extends PageParser {
       );
     }
 
-    this.postToSlack({
+    await this.postToSlack({
       username: 'ETC Billing',
       icon_emoji: ':etc:',
       mrkdwn: true,

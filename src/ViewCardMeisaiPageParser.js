@@ -1,3 +1,4 @@
+const moji = require('moji');
 const PageParser = require('./Pageparser')
 
 class ViewCardMeisaiParser extends PageParser {
@@ -30,7 +31,7 @@ class ViewCardMeisaiParser extends PageParser {
   async parse_page() {
     return this.page.evaluate(() => {
       const trs = [...document.querySelectorAll("div#DivDetailInfo table tbody tr")];
-      trs.shift();
+      //trs.shift();
 
       return trs.map(function(tr){
         const td1 = tr.querySelectorAll("td:nth-child(1)");
@@ -55,6 +56,91 @@ class ViewCardMeisaiParser extends PageParser {
       return true;
     } catch(e) {
       return false;
+    }
+  }
+
+  async compareMeisai(oldData, newData) {
+    const oldHistory = !!oldData ? oldData.meisai : [];
+    const newHistory = !!newData ? newData : [];
+    //const oldBalance = !!oldData ? oldData.misc : [];
+    //const newBalance = !!newData ? newData.misc : [];
+
+    let total = 0;
+    const old_idx = {};
+    const monthTotalAll = {};
+    const monthTotalDiff = {};
+    const formatted = [];
+
+    oldHistory.forEach(h => {
+      const key = `${h.date} ${h.shop} ${h.price}`;
+      if (!old_idx[key]) { old_idx[key] = 1 }
+      else               { old_idx[key]++   }
+    });
+
+    newHistory.forEach(h => {
+      const month = h.date.split('/').splice(0,2).join('/');
+      h.price = parseInt(h.price);
+      h.month = month;
+      if (monthTotalAll[month]) { monthTotalAll[month] += h.price }
+      else                      { monthTotalAll[month] =  h.price }
+      total += h.price;
+    });
+
+    const notifyHistory = newHistory.filter(h => { const key = `${h.date} ${h.shop} ${h.price}`; return !old_idx[key] });
+    console.log(`new=${newHistory.length}, notify=${notifyHistory.length}`);
+
+    notifyHistory.forEach(h => {
+      const month = h.month;
+
+      if (!monthTotalDiff[month]) monthTotalDiff[month] = 0;
+      monthTotalDiff[month] += h.price;
+
+      formatted.push(
+        "*" + h.date.split('/').splice(1).join('/')
+          +  "* `¥" + h.price + "-` "
+          + moji(h.shop)
+            .convert("ZE", "HE")
+            .convert("ZS", "HS")
+            .convert("ZK", "HK")
+            .toString(),
+      );
+    });
+
+    if (formatted.length > 0) {
+      formatted.push("\n"); // separator
+
+      for (const key of Object.keys(monthTotalDiff))    {
+        formatted.push(
+          "*" + key + " Added Price* : `¥" + monthTotalDiff[key] + "-`",
+        );
+      }
+
+      formatted.push("\n"); // separator
+
+      for (const key of Object.keys(monthTotalAll))    {
+        formatted.push(
+          "*" + key + " Total Price* : `¥" + monthTotalAll[key] + "-`",
+        );
+      }
+
+      formatted.push(
+        "",
+        "*Total Price* : `¥" + total + "-`",
+      );
+
+      //if (oldBalance.remain !== newBalance.remain)  {
+      //  formatted.push(
+      //    "",
+      //    "*Balance* : remain=`¥" + newBalance.remain + "-`, using=`¥" + newBalance.using + "-`",
+      //  );
+      //}
+
+      await this.postToSlack({
+        username:    "VIEW Card Billing",
+        icon_emoji:  ':viewcard:',
+        mrkdwn:      true,
+        text       : formatted.join("\n"),
+      });
     }
   }
 }
