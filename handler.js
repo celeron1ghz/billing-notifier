@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports.main = async (event, context) => {
+module.exports.runner = async (event, context) => {
   if (!process.env.TARGETS)   {
     throw Error('env TARGETS not specified');
   }
