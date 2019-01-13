@@ -29,7 +29,7 @@ class EtcMeisaiParser extends PageParser {
       trs.shift();
 
       return trs.map(tr => {
-        const td1 = [...tr.querySelectorAll("td:nth-child(2) > table > tbody > tr > td > span")].map(function(span){ return span.innerHTML }); 
+        const td1 = [...tr.querySelectorAll("td:nth-child(2) > table > tbody > tr > td > span")].map(function(span){ return span.innerHTML.replace(/&nbsp;/g, '') });
         const td2 = tr.querySelector("td:nth-child(3) span").innerHTML;
         const td4 = tr.querySelector("td:nth-child(5) span").innerHTML;
         const from  = td1[0].split('<br>');
