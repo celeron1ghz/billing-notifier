@@ -54,7 +54,7 @@ class EtcMileParser extends PageParser {
 
     // compare to old
     for (const key of Object.keys(newPoint)) {
-      const o = oldPoint[key];
+      const o = oldPoint[key] || {};
       const n = newPoint[key];
 
       if (o.point === n.point)  {
