@@ -1,16 +1,12 @@
 'use strict';
 
-const aws = require('aws-sdk');
-const EtcMeisaiParser = require('./src/EtcMeisaiPageParser');
-const EtcMileParser = require('./src/EtcMilePageParser');
-const ViewCardMeisaiParser = require('./src/ViewCardMeisaiPageParser');
-
 module.exports.main = async (event, context) => {
-  const sites = [
-    new ViewCardMeisaiParser(),
-    new EtcMeisaiParser(),
-    new EtcMileParser(),
-  ];
+  if (!process.env.TARGETS)   {
+    throw Error('env TARGETS not specified');
+  }
+
+  console.log("Targets:", process.env.TARGETS);
+  const sites = process.env.TARGETS.split(',').map(t => { const clazz = require('./src/' + t); return new clazz });
 
   for (const site of sites)   {
     await site.init();
