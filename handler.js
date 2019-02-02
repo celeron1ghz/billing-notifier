@@ -9,13 +9,18 @@ module.exports.runner = async (event, context) => {
   const sites = process.env.TARGETS.split(',').map(t => { const clazz = require('./src/' + t); return new clazz });
 
   for (const site of sites)   {
-    await site.init();
+    try {
+      await site.init();
+    } catch (e) {
+      console.log("Error on init: ", e);
+      return;
+    }
   }
 
   process.env.HOME = "/opt/";
 
-  try {
-    for (const site of sites)   {
+  for (const site of sites)   {
+    try {
       const newData = await site.parse();
       const oldData = await site.getMostRecentMeisai();
 
@@ -25,9 +30,10 @@ module.exports.runner = async (event, context) => {
 
       await site.compareMeisai(oldData, newData);
       await site.storeMostRecentMeisai({ meisai: newData });
+    } catch(e) {
+      console.log("Error on fetch:", e);
+      return;
     }
-  } catch(e) {
-    console.log("Error happen:", e);
   }
 
   return 'OK';
