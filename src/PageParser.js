@@ -70,7 +70,8 @@ class PageParser {
 
   async screenshot() {
     //const image = await page.screenshot();
-    const image = await this.page.screenshot({ clip: { x: 0, y: 0, width: 1024, height: 800 } });
+    //const image = await this.page.screenshot({ clip: { x: 0, y: 0, width: 1024, height: 800 } });
+    const image = await this.page.screenshot({ fullPage: true });
     const filename = 'ss/' + this.name + "-" + new Date().getTime() + '.png';
     console.log("screenshot:", filename);
     return this.s3.putObject({ Bucket: this.bucket, Key: filename, Body: image }).promise();

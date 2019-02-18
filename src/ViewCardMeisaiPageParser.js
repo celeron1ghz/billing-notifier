@@ -51,17 +51,20 @@ class ViewCardMeisaiParser extends PageParser {
   }
 
   async goto_next_page() {
+    await this.page.waitFor(2000);
+
     try {
       const next = await this.page.$("#LnkNextBottom");
       if (next == null) {
         return false;
       }
 
-      await this.page.click("#LnkNextBottom");
+      this.page.click("#LnkNextBottom");
       await this.page.waitForNavigation({ waitUntil: 'domcontentloaded' });
       return true;
     } catch(e) {
       console.log("last page:", e);
+      await this.screenshot();
       return false;
     }
   }
